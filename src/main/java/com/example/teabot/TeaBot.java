@@ -12,7 +12,6 @@ public class TeaBot extends TelegramLongPollingBot {
     private final Environment environment;
     private final TeaOrderHandler handler = new TeaOrderHandler(this);
 
-
     @Autowired
     public TeaBot(Environment environment) {
         super(environment.getProperty("tea.bot.token"));

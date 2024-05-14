@@ -2,6 +2,9 @@ package com.example.teabot.model.enums;
 
 public enum OrderState {
     START,
+    TEA_MAKER_BUILDING_PROPOSAL,
+    TEA_MAKER_SELECTING_AWAITING,
+    TEA_BUILDING_TYPE_PROPOSAL,
     TEA_BUILDING_TYPE_AWAITING,
     INPUT_NAME_AWAITING,
     TYPE_SELECTION_AWAITING,
@@ -16,5 +19,8 @@ public enum OrderState {
     DELICACY_TYPE_AWAITING,
     DELICACY_COUNT_AWAITING,
 
-    SAVE_ORDER
+    SAVE_ORDER,
+    NULL,
+    CANCEL_ORDER,
+    SKIP_AND_ORDER
 }

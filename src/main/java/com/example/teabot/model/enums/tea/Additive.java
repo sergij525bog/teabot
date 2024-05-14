@@ -1,13 +1,16 @@
 package com.example.teabot.model.enums.tea;
 
+import com.example.teabot.model.enums.OrderParameter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Getter
-public enum Additive {
+public enum Additive implements OrderParameter {
     LEMON("lemon"),
     RASPBERRY("raspberry"),
     GINGER("ginger"),
@@ -21,5 +24,11 @@ public enum Additive {
                 .filter(e -> e.additive.equals(color))
                 .findFirst()
                 .orElseThrow();
+    }
+
+    @Override
+    public Stream<String> parametersAsStream() {
+        return Arrays.stream(values())
+                .map(Additive::getAdditive);
     }
 }

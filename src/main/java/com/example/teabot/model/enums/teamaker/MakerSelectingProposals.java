@@ -1,24 +1,23 @@
-package com.example.teabot.model.enums.tea;
+package com.example.teabot.model.enums.teamaker;
 
 import com.example.teabot.model.enums.OrderParameter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Getter
-public enum TeaBuildingType implements OrderParameter {
-    BY_NAME("Input tea name"),
-    BY_DESCRIPTION("Describe tea");
+public enum MakerSelectingProposals implements OrderParameter {
+    I_WANT_TEA("I want tea"),
+    I_WILL_MAKE_TEA("I will make tea");
 
-    private final String buildingType;
+    private final String message;
 
     @Override
     public Stream<String> parametersAsStream() {
         return Arrays.stream(values())
-                .map(TeaBuildingType::getBuildingType);
+                .map(MakerSelectingProposals::getMessage);
     }
 }

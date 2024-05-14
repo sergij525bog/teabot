@@ -1,33 +1,48 @@
 package com.example.teabot;
 
-import com.example.teabot.model.*;
+import com.example.teabot.model.ChatInfo;
+import com.example.teabot.model.UpdateParser;
+import com.example.teabot.model.enums.AttributeUpdateStatus;
+import com.example.teabot.model.enums.NavigationButtons;
 import com.example.teabot.model.enums.OrderState;
 import com.example.teabot.model.enums.cup.CupBuildingType;
 import com.example.teabot.model.enums.delicacy.DelicacyType;
 import com.example.teabot.model.enums.tea.Additive;
-import com.example.teabot.model.enums.tea.Color;
 import com.example.teabot.model.enums.tea.TeaBuildingType;
-import com.example.teabot.model.enums.tea.Type;
-import com.example.teabot.model.views.*;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import com.example.teabot.model.enums.teamaker.Answers;
+import com.example.teabot.model.enums.teamaker.MakerSelectingProposals;
+import com.example.teabot.model.handlers.AttributeHandler;
+import com.example.teabot.model.handlers.HandlerFactory;
+import com.example.teabot.model.handlers.OrderSavingHandler;
 import lombok.SneakyThrows;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessages;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
-@RequiredArgsConstructor
+import static com.example.teabot.model.enums.OrderState.*;
+
+@Component
 public class TeaOrderHandler {
-    public static final String INCORRECT_INPUT_MESSAGE = "Incorrect input. Please input '/start' command";
     private final TeaBot bot;
-    private TeaOrder order;
-//    private Long teaMakerChatId = 348211570L;
 
-    private static final Map<Long, ChatInfo> chatInfoMap = new HashMap<>();
-    private static final Map<Long, OrderState> orderStates = new HashMap<>();
+    public TeaOrderHandler(TeaBot bot) {
+        this.bot = bot;
+        initializeActions();
+    }
+
+    private static final Map<Long, ChatInfo> memberOrderInfo = new HashMap<>();
+    private static final Map<Long, Long> memberChat = new HashMap<>();
+    private static final Map<Long, Long> chatTeaMaker = new HashMap<>();
+    private final Map<OrderState, Consumer<Long>> chatOnlyActions = new HashMap<>();
+    private final Map<OrderState, BiConsumer<Long, String>> dataActions = new HashMap<>();
+    private static final Map<NavigationButtons, BiConsumer<Long, OrderState>> navigationActions = getNavigationActions();
 
     @SneakyThrows
     public void handle(Update update) {
@@ -36,307 +51,365 @@ public class TeaOrderHandler {
     }
 
     private void processUpdate(UpdateParser parser) {
-        final Long chatId = parser.getChatId();
-        final String data = parser.getData();
+        final Long senderId = parser.getSenderId();
 
-        initializeChatInfo(chatId);
-        saveChatMessage(chatId, parser.getMessageId());
-
-        if ("/start".equals(data)) {
-            orderStates.put(chatId, OrderState.START);
+        if (memberOrderInfo.get(senderId) != null || isStart(parser.getData())) {
+            memberChat.put(senderId, parser.getChatId());
+            saveChatMessage(senderId, parser.getMessageId());
+            processData(senderId, parser.getData());
         }
-        if ("next".equals(data)) {
-            orderStates.put(chatId, OrderState.CUP_BUILDING_TYPE_PROPOSAL);
+    }
+
+    private void processData(Long senderId, String data) {
+        if (isStart(data)) {
+            setCurrentState(senderId, START);
         }
 
-        if (orderStates.get(chatId) == null) {
-            renderError(chatId, data);
+        if (getCurrentState(senderId) == null) {
+            renderError(senderId);
             return;
         }
 
-        switch (orderStates.get(chatId)) {
-            case START -> proposeSelectTeaCreationType(chatId);
-            case TEA_BUILDING_TYPE_AWAITING -> selectTeaCreationType(chatId, data);
-            case INPUT_NAME_AWAITING -> saveName(chatId, data);
-            case TYPE_SELECTION_AWAITING -> saveTeaType(chatId, data);
-            case COLOR_SELECTION_AWAITING -> saveTeaColor(chatId, data);
-            case ADDITIONS_AWAITING -> saveAdditive(chatId, data);
-            case CUP_BUILDING_TYPE_PROPOSAL -> proposeSelectCupBuildingType(chatId);
-            case CUP_BUILDING_TYPE_AWAITING -> selectCupBuildingType(chatId, data);
-            case CUP_SIZE_AWAITING -> saveCupSize(chatId, data);
-            case CUP_NAME_AWAITING -> saveCupName(chatId, data);
-            case DELICACY_TYPE_AWAITING -> saveDelicacyType(chatId, data);
-            case DELICACY_COUNT_AWAITING -> saveDelicacyCount(chatId, data);
-//            case SAVE_ORDER_AWAITING -> saveOrder(chatId);
+        if (NavigationButtons.isNavigation(data)) {
+            processNavigation(senderId, data);
         }
+
+        processState(senderId, data);
+    }
+
+    private void processState(Long senderId, String data) {
+        OrderState currentState = getCurrentState(senderId);
+        BiConsumer<Long, String> action = dataActions.get(currentState);
+
+        if (action == null) {
+            chatOnlyActions.get(currentState).accept(senderId);
+        } else {
+            action.accept(senderId, data);
+        }
+    }
+
+    private void cancelOrder(Long senderId) {
+        renderMessage(senderId);
+        clearChat(senderId);
+    }
+
+    private void clearChat(Long senderId) {
+        deleteKeyboard(senderId);
+        deleteOrderBuildingMessages(senderId);
+        memberChat.remove(senderId);
+    }
+
+    private void processNavigation(Long senderId, String data) {
+        List<OrderState> nextPrevStates = getNextPrevStates(senderId);
+        NavigationButtons navigation = NavigationButtons.getInstance(data);
+
+        OrderState state = switch (navigation) {
+            case NEXT -> nextPrevStates.get(0);
+            case BACK -> nextPrevStates.get(1);
+            case CANCEL -> CANCEL_ORDER;
+            case SKIP -> SKIP_AND_ORDER;
+        };
+
+        navigationActions.get(navigation).accept(senderId, state);
+    }
+
+    private void setDefaultsAndOrder(Long senderId) {
+        memberOrderInfo.get(senderId).setDefaults();
+        saveOrder(senderId);
+    }
+
+    private static boolean isStart(String data) {
+        return "/start".equals(data) || "/start@YouAreTheTea_bot".equals(data);
     }
 
     // todo: check data contains only digits
-    private void saveDelicacyCount(Long chatId, String data) {
-        Delicacy delicacy = getDelicacy(chatId);
-        delicacy.setCount(Byte.parseByte(data));
+    private void saveDelicacyCount(Long senderId, String data) {
+        AttributeHandler handler = getHandler(senderId);
+        handler.updateAttribute(data, memberOrderInfo.get(senderId));
 
-        saveOrder(chatId);
+        saveOrder(senderId);
     }
 
-    private void saveDelicacyType(Long chatId, String data) {
-        Arrays.stream(DelicacyType.values())
-                .filter(type -> type.getType().equals(data))
-                .findFirst()
-                .ifPresentOrElse(
-                        type -> {
-                            Delicacy delicacy = getDelicacy(chatId);
-                            delicacy.setType(type);
-
-                            orderStates.put(chatId, OrderState.DELICACY_COUNT_AWAITING);
-                            changeView(chatId, new DelicacyCountButtonView(delicacy));
-                            renderMessage(chatId);
-                }, () -> renderError(chatId, data));
-    }
-
-    private void selectCupBuildingType(Long chatId, String data) {
-        OrderState state;
-        final Cup cup = getCup(chatId);
-        if (CupBuildingType.BY_NAME.getType().equals(data)) {
-            changeView(chatId, new CupNameButtonView(cup));
-            state = OrderState.CUP_NAME_AWAITING;
-        } else if (CupBuildingType.BY_SIZE.getType().equals(data)) {
-            changeView(chatId, new CupSizeButtonView(cup));
-            state = OrderState.CUP_SIZE_AWAITING;
+    private void saveDelicacyType(Long senderId, String data) {
+        if (DelicacyType.NONE.getType().equals(data)) {
+            saveOrder(senderId);
         } else {
-            renderError(chatId, data);
-            return;
+            processUpdateStatus(senderId, data, DELICACY_COUNT_AWAITING);
         }
-
-        renderMessage(chatId);
-        orderStates.put(chatId, state);
     }
 
     private void proposeSelectCupBuildingType(Long chatId) {
-        changeView(chatId, new CupBuildingTypeButtonView(getCup(chatId)));
-        orderStates.put(chatId, OrderState.CUP_BUILDING_TYPE_AWAITING);
         renderMessage(chatId);
+        setCurrentState(chatId, CUP_BUILDING_TYPE_AWAITING);
     }
 
     private void saveCupName(Long chatId, String data) {
-        Cup cup = getCup(chatId);
-        cup.setName(data);
-
-        orderStates.put(chatId, OrderState.DELICACY_TYPE_AWAITING);
-        changeView(chatId, new DelicacyTypeButtonView(getDelicacy(chatId)));
-        renderMessage(chatId);
+        processUpdateStatus(chatId, data, DELICACY_TYPE_AWAITING);
+        if (!NavigationButtons.isNavigation(data)) {
+            setPrevState(chatId, CUP_NAME_AWAITING);
+        }
     }
 
     private void saveCupSize(Long chatId, String data) {
-        Cup cup = getCup(chatId);
-        cup.setSize(data);
-
-        orderStates.put(chatId, OrderState.DELICACY_TYPE_AWAITING);
-        changeView(chatId, new DelicacyTypeButtonView(getDelicacy(chatId)));
-        renderMessage(chatId);
+        processUpdateStatus(chatId, data, DELICACY_TYPE_AWAITING);
+        if (!NavigationButtons.isNavigation(data)) {
+            setPrevState(chatId, CUP_SIZE_AWAITING);
+        }
     }
 
-    private void saveChatMessage(Long chatId, Integer messageId) {
-        List<Integer> messageIds = chatInfoMap
+    private static void saveChatMessage(Long chatId, Integer messageId) {
+        List<Integer> messageIds = memberOrderInfo
                 .computeIfAbsent(chatId, k -> new ChatInfo())
-                .messageIds;
+                .getMessageIds();
         messageIds.add(messageId);
     }
 
     private void saveOrder(Long chatId) {
-        changeView(chatId, new StopView(getTea(chatId), chatInfoMap.get(chatId)));
+        setCurrentState(chatId, SAVE_ORDER);
+        AttributeHandler handler = getHandler(chatId);
+        ((OrderSavingHandler) handler).setOrderInfo(memberOrderInfo.get(chatId));
 
-        deleteKeyboard(chatId);
-        orderStates.remove(chatId);
-        clearUserMessages(chatId);
+        clearChat(chatId);
     }
 
-    @SneakyThrows
-    private void clearUserMessages(Long chatId) {
-        final ChatInfo chatInfo = chatInfoMap.get(chatId);
-        if (chatInfo != null && !chatInfo.messageIds.isEmpty()) {
-            DeleteMessages deleteMessage = DeleteMessages.builder()
-                    .chatId(chatId)
-                    .messageIds(chatInfo.messageIds)
-                    .build();
-
-            bot.execute(deleteMessage);
-            chatInfoMap.remove(chatId);
+    private void saveTeaColor(Long chatId, String data) {
+        processUpdateStatus(chatId, data, ADDITIONS_AWAITING);
+        if (!NavigationButtons.isNavigation(data)) {
+            setPrevState(chatId, COLOR_SELECTION_AWAITING);
         }
     }
 
-    @SneakyThrows
-    private void saveTeaColor(Long chatId, String data) {
-        Arrays.stream(Color.values())
-                .filter(color -> color.getColor().equals(data))
-                .findFirst()
-                .ifPresentOrElse(color -> {
-                    final Tea tea = getTea(chatId);
-                    tea.setColor(color);
-
-                    changeView(chatId, new AdditiveButtonView(tea));
-
-                    renderMessage(chatId);
-                    orderStates.put(chatId, OrderState.ADDITIONS_AWAITING);
-                }, () -> renderError(chatId, data));
-    }
-
-    private void saveAdditive(Long chatId, String data) {
-        final Additive teaAdditive = Arrays.stream(Additive.values())
-                .filter(additive -> additive.getAdditive().equals(data))
-                .findFirst()
-                .orElseThrow();
-
-        final Tea tea = getTea(chatId);
-        tea.getAdditives().add(teaAdditive);
-    }
-
-    @SneakyThrows
-    private void deleteKeyboard(Long chatId) {
-        ReplyKeyboardRemove remove = ReplyKeyboardRemove.builder()
-                .removeKeyboard(true)
-                .build();
-        SendMessage sendMessage = SendMessage.builder()
-                .chatId(chatId)
-                .text(getView(chatId).question())
-                .replyMarkup(remove)
-                .build();
-        bot.execute(sendMessage);
-    }
-
-    private void saveTeaType(Long chatId, String data) {
-        Arrays.stream(Type.values())
-                .filter(type -> type.getType().equals(data))
-                .findFirst()
-                .ifPresentOrElse(type -> {
-                    final Tea tea = getTea(chatId);
-                    tea.setType(type);
-
-                    changeView(chatId, new ColorButtonView(tea));
-
-                    renderMessage(chatId);
-                    orderStates.put(chatId, OrderState.COLOR_SELECTION_AWAITING);
-                }, () -> renderError(chatId, data));
-    }
-
-    private void saveName(Long chatId, String data) {
-        final Tea tea = getTea(chatId);
-        tea.setName(data);
-
-        changeView(chatId, new AdditiveButtonView(tea));
-
-        renderMessage(chatId);
-        orderStates.put(chatId, OrderState.ADDITIONS_AWAITING);
-    }
-
-    private void selectTeaCreationType(Long chatId, String data) {
-        OrderState state;
-        final Tea tea = getTea(chatId);
-        if (TeaBuildingType.BY_NAME.getBuildingType().equals(data)) {
-            changeView(chatId, new TeaNameButtonView(tea));
-            state = OrderState.INPUT_NAME_AWAITING;
-        } else if (TeaBuildingType.BY_DESCRIPTION.getBuildingType().equals(data)) {
-            changeView(chatId, new TeaTypeButtonView(tea));
-            state = OrderState.TYPE_SELECTION_AWAITING;
-        } else {
-            renderError(chatId, data);
+    private void processUpdateStatus(Long chatId, String data, OrderState newState) {
+        if (NavigationButtons.isNavigation(data)) {
+            renderMessage(chatId);
             return;
         }
 
-        renderMessage(chatId);
-        orderStates.put(chatId, state);
+        AttributeHandler handler = getHandler(chatId);
+        AttributeUpdateStatus status = handler.updateAttribute(data, memberOrderInfo.get(chatId));
+
+        if (status == AttributeUpdateStatus.OK) {
+            setCurrentState(chatId, newState);
+            renderMessage(chatId);
+        } else {
+            renderError(chatId);
+        }
     }
 
-    @SneakyThrows
-    private void renderError(Long chatId, String data) {
-        SendMessage message = SendMessage.builder()
-                .chatId(chatId)
-                .text("Unexpected input: " + data + ". Please try again")
-                .build();
+    private void saveAdditive(Long chatId, String data) {
+        if(Additive.NONE.getAdditive().equals(data)) {
+            setCurrentState(chatId, CUP_BUILDING_TYPE_PROPOSAL);
+            proposeSelectCupBuildingType(chatId);
+            return;
+        }
 
-        bot.execute(message);
+        OrderState currentState = getCurrentState(chatId);
+        processUpdateStatus(chatId, data, currentState);
+    }
+
+    private static OrderState getCurrentState(Long chatId) {
+        return memberOrderInfo.get(chatId).getCurrentState();
+    }
+
+    private void saveTeaType(Long chatId, String data) {
+        processUpdateStatus(chatId, data, COLOR_SELECTION_AWAITING);
+    }
+
+    private void saveName(Long chatId, String data) {
+        processUpdateStatus(chatId, data, ADDITIONS_AWAITING);
+        if (!NavigationButtons.isNavigation(data)) {
+            setPrevState(chatId, INPUT_NAME_AWAITING);
+        }
+    }
+
+    private void selectTeaCreationType(Long senderId, String data) {
+        Arrays.stream(TeaBuildingType.values())
+                .filter(type -> type.getBuildingType().equals(data))
+                .findFirst()
+                .ifPresentOrElse(type -> {
+                    OrderState state = type == TeaBuildingType.BY_NAME ?
+                            INPUT_NAME_AWAITING :
+                            TYPE_SELECTION_AWAITING;
+
+                    storeUserChoiceAndRender(senderId, state);
+                }, () -> renderError(senderId));
+    }
+
+    private void selectCupBuildingType(Long senderId, String data) {
+        Arrays.stream(CupBuildingType.values())
+                .filter(type -> type.getType().equals(data))
+                .findFirst()
+                .ifPresentOrElse(type -> {
+                    OrderState state = type == CupBuildingType.BY_NAME ?
+                            CUP_NAME_AWAITING :
+                            CUP_SIZE_AWAITING;
+
+                    storeUserChoiceAndRender(senderId, state);
+                }, () -> renderError(senderId));
+    }
+
+    private void storeUserChoiceAndRender(Long senderId, OrderState state) {
+        setNextState(senderId, state);
+        setCurrentState(senderId, state);
+        renderMessage(senderId);
     }
 
     private void proposeSelectTeaCreationType(Long chatId) {
-        orderStates.put(chatId, OrderState.TEA_BUILDING_TYPE_AWAITING);
         renderMessage(chatId);
+        setCurrentState(chatId, TEA_BUILDING_TYPE_AWAITING);
+    }
+
+    private void proposeSelectTeaMaker(Long senderId) {
+        renderMessage(senderId);
+        setCurrentState(senderId, TEA_MAKER_BUILDING_PROPOSAL);
+    }
+
+    private void saveTeaMaker(Long senderId, String data) {
+        if (Answers.I_CAN_CREATE_TEA.getAnswer().equals(data)) {
+            chatTeaMaker.put(getChatId(senderId), senderId);
+        }
+        processUpdateStatus(senderId, data, TEA_BUILDING_TYPE_AWAITING);
+    }
+
+
+    private void selectTeaMaker(Long senderId, String data) {
+        OrderState newState;
+        if (MakerSelectingProposals.I_WILL_MAKE_TEA.getMessage().equals(data)){
+            newState = TEA_BUILDING_TYPE_AWAITING;
+            chatTeaMaker.put(getChatId(senderId), senderId);
+        } else {
+            newState = TEA_MAKER_SELECTING_AWAITING;
+        }
+
+        processUpdateStatus(senderId, data, newState);
+    }
+
+    @SneakyThrows
+    private void renderError(Long chatId) {
+        final AttributeHandler handler = getHandler(chatId);
+
+        final ReplyKeyboard markup = handler != null ? handler.getMarkup() : null;
+        renderMessage(chatId, "Unexpected input. Please try again", markup);
     }
 
     @SneakyThrows
     private void renderMessage(Long chatId) {
-        final View view = getView(chatId);
-        SendMessage sendMessage = SendMessage.builder()
-                .chatId(chatId)
-                .text(view.question())
-                .replyMarkup(view.getMarkup())
-                .build();
-        final Integer messageId = bot.execute(sendMessage).getMessageId();
+        final AttributeHandler handler = getHandler(chatId);
+
+        renderMessage(chatId, handler.question(), handler.getMarkup());
+    }
+
+    @SneakyThrows
+    private void renderMessage(Long chatId, String text, ReplyKeyboard markup) {
+        final List<Integer> messageIds = memberOrderInfo.get(chatId).getMessageIds();
+
+        SendMessage message = buildMessage(chatId, text, markup);
+        message.setReplyToMessageId(messageIds.get(messageIds.size() - 1));
+
+        final Integer messageId = bot.execute(message).getMessageId();
         saveChatMessage(chatId, messageId);
     }
 
-    private void changeView(Long chatId, View view) {
-        ChatInfo chatInfo = chatInfoMap.get(chatId);
-
-        chatInfo.view = view;
+    private SendMessage buildMessage(Long senderId, String text, ReplyKeyboard markup) {
+        return SendMessage.builder()
+                .chatId(getChatId(senderId))
+                .text(text)
+                .replyMarkup(markup)
+                .build();
     }
 
-    private void initializeChatInfo(Long chatId) {
-        chatInfoMap.putIfAbsent(chatId, new ChatInfo());
+    @SneakyThrows
+    private void deleteKeyboard(Long chatId) {
+        final AttributeHandler handler = getHandler(chatId);
+        final ReplyKeyboardRemove keyboard = ReplyKeyboardRemove.builder()
+                .removeKeyboard(true)
+                .selective(true)
+                .build();
+
+        final SendMessage message = buildMessage(chatId, handler.question(), keyboard);
+        bot.execute(message);
     }
 
-    private static View getView(Long chatId) {
-        final ChatInfo chatInfo = chatInfoMap.get(chatId);
+    @SneakyThrows
+    private void deleteOrderBuildingMessages(Long chatId) {
+        final ChatInfo chatInfo = memberOrderInfo.get(chatId);
+        if (chatInfo != null && !chatInfo.getMessageIds().isEmpty()) {
+            DeleteMessages deleteMessage = DeleteMessages.builder()
+                    .chatId(getChatId(chatId))
+                    .messageIds(chatInfo.getMessageIds())
+                    .build();
 
-        if (chatInfo == null) {
-            throw new RuntimeException("Chat info cannot be null");
+            bot.execute(deleteMessage);
+            memberOrderInfo.remove(chatId);
         }
-
-        return chatInfo.view;
     }
 
-    private static Tea getTea(Long chatId) {
-        final ChatInfo chatInfo = chatInfoMap.get(chatId);
-
-        if (chatInfo == null) {
-            throw new RuntimeException("Chat info cannot be null");
-        }
-
-        return chatInfo.tea;
+    private static AttributeHandler getHandler(Long chatId) {
+        final OrderState currentState = getCurrentState(chatId);
+        return HandlerFactory.getHandler(currentState);
     }
 
-    private static Cup getCup(Long chatId) {
-        final ChatInfo chatInfo = chatInfoMap.get(chatId);
-
-        if (chatInfo == null) {
-            throw new RuntimeException("Chat info cannot be null");
-        }
-
-        return chatInfo.cup;
+    private static void setCurrentState(Long chatId, OrderState newState) {
+        final ChatInfo chatInfo = memberOrderInfo.get(chatId);
+        chatInfo.setCurrentState(newState);
     }
 
-    private static Delicacy getDelicacy(Long chatId) {
-        final ChatInfo chatInfo = chatInfoMap.get(chatId);
-
-        if (chatInfo == null) {
-            throw new RuntimeException("Chat info cannot be null");
+    private static void setNextState(Long chatId, OrderState next) {
+        if (NULL != next) {
+            List<OrderState> orderStates = getNextPrevStates(chatId);
+            orderStates.set(0, next);
         }
-
-        return chatInfo.delicacy;
     }
 
-    @NoArgsConstructor
-    public static class ChatInfo {
-        private final Tea tea = new Tea();
-        private final Cup cup = new Cup();
-        private final Delicacy delicacy = new Delicacy();
-        private View view = new InitialView(tea);
-        private final List<Integer> messageIds = new LinkedList<>();
-
-        @Override
-        public String toString() {
-            return "tea: " + tea +
-                    "\ncup: " + cup +
-                    "\ndelicacy: " + delicacy;
+    private static void setPrevState(Long chatId, OrderState prev) {
+        if (NULL != prev) {
+            List<OrderState> orderStates = getNextPrevStates(chatId);
+            orderStates.set(1, prev);
         }
+    }
+
+    private static List<OrderState> getNextPrevStates(Long chatId) {
+        OrderState currentState = getCurrentState(chatId);
+        return memberOrderInfo.get(chatId).getOrderStates().get(currentState);
+    }
+
+    private static Long getChatId(Long senderId) {
+        return memberChat.get(senderId);
+    }
+
+    private void initializeActions() {
+        initializeChatActions();
+        initializeDataActions();
+    }
+
+    private void initializeChatActions() {
+        chatOnlyActions.put(START, this::proposeSelectTeaMaker);
+        chatOnlyActions.put(TEA_BUILDING_TYPE_PROPOSAL, this::proposeSelectTeaCreationType);
+        chatOnlyActions.put(CUP_BUILDING_TYPE_PROPOSAL, this::proposeSelectCupBuildingType);
+        chatOnlyActions.put(CANCEL_ORDER, this::cancelOrder);
+        chatOnlyActions.put(SKIP_AND_ORDER, this::setDefaultsAndOrder);
+    }
+
+    private void initializeDataActions() {
+        dataActions.put(TEA_MAKER_BUILDING_PROPOSAL, this::selectTeaMaker);
+        dataActions.put(TEA_MAKER_SELECTING_AWAITING, this::saveTeaMaker);
+        dataActions.put(TEA_BUILDING_TYPE_AWAITING, this::selectTeaCreationType);
+        dataActions.put(INPUT_NAME_AWAITING, this::saveName);
+        dataActions.put(TYPE_SELECTION_AWAITING, this::saveTeaType);
+        dataActions.put(COLOR_SELECTION_AWAITING, this::saveTeaColor);
+        dataActions.put(ADDITIONS_AWAITING, this::saveAdditive);
+        dataActions.put(CUP_BUILDING_TYPE_AWAITING, this::selectCupBuildingType);
+        dataActions.put(CUP_SIZE_AWAITING, this::saveCupSize);
+        dataActions.put(CUP_NAME_AWAITING, this::saveCupName);
+        dataActions.put(DELICACY_TYPE_AWAITING, this::saveDelicacyType);
+        dataActions.put(DELICACY_COUNT_AWAITING, this::saveDelicacyCount);
+    }
+
+    private static Map<NavigationButtons, BiConsumer<Long, OrderState>> getNavigationActions() {
+        final Map<NavigationButtons, BiConsumer<Long, OrderState>> navigationActions = new HashMap<>();
+        Arrays.stream(NavigationButtons.values())
+                .forEach(button -> navigationActions.put(button, TeaOrderHandler::setCurrentState));
+
+        return navigationActions;
     }
 }

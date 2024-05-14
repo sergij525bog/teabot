@@ -1,11 +1,16 @@
 package com.example.teabot.model.enums.delicacy;
 
+import com.example.teabot.model.enums.OrderParameter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
+
 @RequiredArgsConstructor
 @Getter
-public enum DelicacyType {
+public enum DelicacyType implements OrderParameter {
     COOKIE("cookie"),
     CANDY("candy"),
     CAKE("cake"),
@@ -16,4 +21,10 @@ public enum DelicacyType {
     NONE("none");
 
     private final String type;
+
+    @Override
+    public Stream<String> parametersAsStream() {
+        return Arrays.stream(values())
+                .map(DelicacyType::getType);
+    }
 }

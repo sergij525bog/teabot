@@ -17,6 +17,10 @@ public class UpdateParser {
     private Long senderId;
     private Integer messageId;
     private String data;
+    private String callbackQueryId;
+
+//    curl -X POST https://api.telegram.org/bot<bot-token>/sendMessage -H 'Content-Type: application/json' -d '{"chat_id": "<chatId>", "text": "ALERT! Root volume is about to be full"}'
+
 
     public static UpdateParser fromUpdate(Update update) {
         final UpdateParser parser = new UpdateParser();
@@ -35,6 +39,7 @@ public class UpdateParser {
             parser.data = callbackQuery.getData();
             parser.senderId = callbackQuery.getFrom().getId();
             parser.messageId = message.getMessageId();
+            parser.callbackQueryId = callbackQuery.getId();
         } else {
             throw new RuntimeException("Update does not have required data");
         }
