@@ -11,7 +11,8 @@ import java.util.stream.Stream;
 @Getter
 public enum MakerSelectingProposals implements OrderParameter {
     I_WANT_TEA("I want tea"),
-    I_WILL_MAKE_TEA("I will make tea");
+    I_CAN_MAKE_TEA("I can make tea"),
+    I_WANT_TEA_AND_CAN_MAKE_IT("I will make tea for myself and can make for others");
 
     private final String message;
 

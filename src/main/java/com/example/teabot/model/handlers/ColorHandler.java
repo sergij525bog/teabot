@@ -2,7 +2,7 @@ package com.example.teabot.model.handlers;
 
 import com.example.teabot.model.ChatInfo;
 import com.example.teabot.model.Tea;
-import com.example.teabot.model.enums.AttributeUpdateStatus;
+import com.example.teabot.model.enums.OrderState;
 import com.example.teabot.model.enums.tea.Color;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
@@ -20,7 +20,7 @@ public class ColorHandler implements AttributeHandler {
     }
 
     @Override
-    public AttributeUpdateStatus updateAttribute(String data, ChatInfo orderInfo) {
+    public OrderState processUserInput(String data, ChatInfo orderInfo) {
         return Arrays.stream(Color.values())
                 .filter(color -> color.getColor().equals(data))
                 .findFirst()
@@ -28,8 +28,10 @@ public class ColorHandler implements AttributeHandler {
                     Tea tea = orderInfo.getTea();
                     tea.setColor(color);
 
-                    return AttributeUpdateStatus.OK;
+                    OrderState state = OrderState.ADDITIONS_AWAITING;
+                    orderInfo.setPrevState(state, orderInfo.getCurrentState());
+                    return state;
                 })
-                .orElse(AttributeUpdateStatus.BAD);
+                .orElse(OrderState.ERROR);
     }
 }

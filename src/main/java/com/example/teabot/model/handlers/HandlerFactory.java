@@ -4,31 +4,36 @@ import com.example.teabot.model.enums.OrderState;
 
 import java.util.EnumMap;
 
-import static com.example.teabot.model.enums.OrderState.*;
-
 public class HandlerFactory {
-    private static final EnumMap<OrderState, AttributeHandler> stateHandlerMap = new EnumMap<>(OrderState.class);
+    private static final EnumMap<OrderState, AttributeHandler> stateHandlerMap = initializeHandlers();
 
-    static {
-        TeaMakerBuildingHandler value = new TeaMakerBuildingHandler();
-        stateHandlerMap.put(START, value);
-        stateHandlerMap.put(TEA_MAKER_BUILDING_PROPOSAL, value);
-        stateHandlerMap.put(TEA_MAKER_SELECTING_AWAITING, new TeaMakerAnswerHandler());
-        stateHandlerMap.put(TEA_BUILDING_TYPE_AWAITING, new InitialHandler());
-        stateHandlerMap.put(INPUT_NAME_AWAITING, new TeaNameHandler());
-        stateHandlerMap.put(TYPE_SELECTION_AWAITING, new TeaTypeHandler());
-        stateHandlerMap.put(COLOR_SELECTION_AWAITING, new ColorHandler());
-        stateHandlerMap.put(ADDITIONS_AWAITING, new AdditiveHandler());
-        stateHandlerMap.put(CUP_BUILDING_TYPE_PROPOSAL, new CupBuildingTypeHandler());
-        stateHandlerMap.put(CUP_SIZE_AWAITING, new CupSizeHandler());
-        stateHandlerMap.put(CUP_NAME_AWAITING, new CupNameHandler());
-        stateHandlerMap.put(DELICACY_TYPE_AWAITING, new DelicacyTypeHandler());
-        stateHandlerMap.put(DELICACY_COUNT_AWAITING, new DelicacyCountHandler());
-        stateHandlerMap.put(SAVE_ORDER, new OrderSavingHandler());
-        stateHandlerMap.put(CANCEL_ORDER, new CancelHandler());
+    private static EnumMap<OrderState, AttributeHandler> initializeHandlers() {
+        final EnumMap<OrderState, AttributeHandler> handlers = new EnumMap<>(OrderState.class);
+        handlers.put(OrderState.START, new StartHandler());
+
+        handlers.put(OrderState.TEA_MAKER_BUILDING_PROPOSAL, new TeaMakerProposalHandler());
+
+        handlers.put(OrderState.TEA_BUILDING_TYPE_PROPOSAL, new TeaBuildingProposalHandler());
+        handlers.put(OrderState.INPUT_NAME_AWAITING, new TeaNameHandler());
+        handlers.put(OrderState.TYPE_SELECTION_AWAITING, new TeaTypeHandler());
+        handlers.put(OrderState.COLOR_SELECTION_AWAITING, new ColorHandler());
+        handlers.put(OrderState.ADDITIONS_AWAITING, new AdditiveHandler());
+
+        handlers.put(OrderState.CUP_BUILDING_TYPE_PROPOSAL, new CupBuildingTypeHandler());
+        handlers.put(OrderState.CUP_NAME_AWAITING, new CupNameHandler());
+        handlers.put(OrderState.CUP_SIZE_AWAITING, new CupSizeHandler());
+
+        handlers.put(OrderState.DELICACY_TYPE_AWAITING, new DelicacyTypeHandler());
+        handlers.put(OrderState.DELICACY_COUNT_AWAITING, new DelicacyCountHandler());
+
+        handlers.put(OrderState.SAVE_ORDER_AWAITING, new OrderSavingHandler());
+        handlers.put(OrderState.CANCEL_ORDER, new CancelHandler());
+        handlers.put(OrderState.WITHOUT_ORDER, new WithoutOrderHandler());
+
+        return handlers;
     }
 
-    public static AttributeHandler getHandler(OrderState state) {
+    public static AttributeHandler getHandlerByState(OrderState state) {
         return stateHandlerMap.get(state);
     }
 }

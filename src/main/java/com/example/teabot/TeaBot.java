@@ -10,7 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Component
 public class TeaBot extends TelegramLongPollingBot {
     private final Environment environment;
-    private final TeaOrderHandler handler = new TeaOrderHandler(this);
+    private final ChatMessageRenderer handler = new ChatMessageRenderer(this);
 
     @Autowired
     public TeaBot(Environment environment) {
@@ -18,7 +18,6 @@ public class TeaBot extends TelegramLongPollingBot {
         this.environment = environment;
     }
 
-    @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
         handler.handle(update);

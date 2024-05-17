@@ -1,11 +1,12 @@
 package com.example.teabot.model.handlers;
 
 import com.example.teabot.model.ChatInfo;
-import com.example.teabot.model.enums.AttributeUpdateStatus;
+import com.example.teabot.model.enums.OrderState;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,12 +20,15 @@ public class OrderSavingHandler implements AttributeHandler {
     }
 
     @Override
-    public AttributeUpdateStatus updateAttribute(String data, ChatInfo orderInfo) {
-        throw new UnsupportedOperationException();
+    public OrderState processUserInput(String data, ChatInfo orderInfo) {
+        return null;
     }
 
     @Override
     public ReplyKeyboard getMarkup() {
-        return null;
+        return ReplyKeyboardRemove.builder()
+                .removeKeyboard(true)
+                .selective(true)
+                .build();
     }
 }

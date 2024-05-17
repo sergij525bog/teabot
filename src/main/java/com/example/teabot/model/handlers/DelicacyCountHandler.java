@@ -2,8 +2,8 @@ package com.example.teabot.model.handlers;
 
 import com.example.teabot.model.ChatInfo;
 import com.example.teabot.model.Delicacy;
-import com.example.teabot.model.enums.AttributeUpdateStatus;
 import com.example.teabot.model.enums.OrderParameter;
+import com.example.teabot.model.enums.OrderState;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
 import java.util.stream.IntStream;
@@ -16,11 +16,12 @@ public class DelicacyCountHandler implements AttributeHandler {
     }
 
     @Override
-    public AttributeUpdateStatus updateAttribute(String data, ChatInfo orderInfo) {
+    public OrderState processUserInput(String data, ChatInfo orderInfo) {
+        //        todo: add string validation
         Delicacy delicacy = orderInfo.getDelicacy();
         delicacy.setCount(Byte.parseByte(data));
 
-        return AttributeUpdateStatus.OK;
+        return OrderState.SAVE_ORDER_AWAITING;
     }
 
     @Override
