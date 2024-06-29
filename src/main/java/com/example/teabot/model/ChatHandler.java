@@ -1,6 +1,6 @@
 package com.example.teabot.model;
 
-import com.example.teabot.TeaBot;
+import com.example.teabot.bot.TeaBot;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;

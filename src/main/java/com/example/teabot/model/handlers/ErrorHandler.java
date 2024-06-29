@@ -1,6 +1,6 @@
 package com.example.teabot.model.handlers;
 
-import com.example.teabot.model.OrderInfo;
+import com.example.teabot.model.orderInfo.OrderInfo;
 import com.example.teabot.model.enums.OrderState;
 import lombok.AllArgsConstructor;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;

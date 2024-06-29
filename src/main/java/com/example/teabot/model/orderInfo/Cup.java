@@ -1,4 +1,4 @@
-package com.example.teabot.model;
+package com.example.teabot.model.orderInfo;
 
 import com.example.teabot.model.enums.cup.Name;
 import com.example.teabot.model.enums.cup.Size;

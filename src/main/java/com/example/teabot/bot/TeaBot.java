@@ -1,4 +1,4 @@
-package com.example.teabot;
+package com.example.teabot.bot;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;

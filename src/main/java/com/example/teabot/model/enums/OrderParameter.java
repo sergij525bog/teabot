@@ -13,7 +13,4 @@ public interface OrderParameter {
         return parametersAsStream().collect(Collectors.toList());
     }
 
-    default boolean isParam(String data) {
-        return parameters().contains(data);
-    }
 }

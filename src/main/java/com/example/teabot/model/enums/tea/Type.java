@@ -16,13 +16,6 @@ public enum Type implements OrderParameter {
 
     private final String type;
 
-    public static Type getInstanceByString(String color) {
-        return Arrays.stream(values())
-                .filter(e -> e.type.equals(color))
-                .findFirst()
-                .orElseThrow();
-    }
-
     @Override
     public Stream<String> parametersAsStream() {
         return Arrays.stream(values())

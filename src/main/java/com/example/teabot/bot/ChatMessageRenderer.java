@@ -1,7 +1,7 @@
-package com.example.teabot;
+package com.example.teabot.bot;
 
 import com.example.teabot.model.ChatHandler;
-import com.example.teabot.model.OrderInfo;
+import com.example.teabot.model.orderInfo.OrderInfo;
 import com.example.teabot.model.UpdateParser;
 import com.example.teabot.model.enums.NavigationButtons;
 import com.example.teabot.model.enums.OrderState;
@@ -13,7 +13,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ChatMessageRenderer {
+class ChatMessageRenderer {
     private final TeaBot bot;
 
     public ChatMessageRenderer(TeaBot bot) {

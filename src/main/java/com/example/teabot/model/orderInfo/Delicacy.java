@@ -1,4 +1,4 @@
-package com.example.teabot.model;
+package com.example.teabot.model.orderInfo;
 
 import com.example.teabot.model.enums.delicacy.DelicacyType;
 import lombok.Getter;

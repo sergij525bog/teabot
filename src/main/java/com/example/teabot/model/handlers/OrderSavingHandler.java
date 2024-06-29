@@ -1,6 +1,6 @@
 package com.example.teabot.model.handlers;
 
-import com.example.teabot.model.OrderInfo;
+import com.example.teabot.model.orderInfo.OrderInfo;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

@@ -1,7 +1,7 @@
 package com.example.teabot.model.handlers;
 
-import com.example.teabot.model.Delicacy;
-import com.example.teabot.model.OrderInfo;
+import com.example.teabot.model.orderInfo.Delicacy;
+import com.example.teabot.model.orderInfo.OrderInfo;
 import com.example.teabot.model.enums.OrderParameter;
 import com.example.teabot.model.enums.OrderState;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
