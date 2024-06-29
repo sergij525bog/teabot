@@ -4,8 +4,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-import org.telegram.telegrambots.meta.api.objects.MaybeInaccessibleMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -17,7 +15,6 @@ public class UpdateParser {
     private Long senderId;
     private Integer messageId;
     private String data;
-    private String callbackQueryId;
 
 //    curl -X POST https://api.telegram.org/bot<bot-token>/sendMessage -H 'Content-Type: application/json' -d '{"chat_id": "<chatId>", "text": "ALERT! Root volume is about to be full"}'
 
@@ -31,19 +28,10 @@ public class UpdateParser {
             parser.data = message.getText();
             parser.senderId = message.getFrom().getId();
             parser.messageId = message.getMessageId();
-        } else if (update.hasCallbackQuery()) {
-            final CallbackQuery callbackQuery = update.getCallbackQuery();
-            final MaybeInaccessibleMessage message = callbackQuery.getMessage();
 
-            parser.chatId = message.getChatId();
-            parser.data = callbackQuery.getData();
-            parser.senderId = callbackQuery.getFrom().getId();
-            parser.messageId = message.getMessageId();
-            parser.callbackQueryId = callbackQuery.getId();
-        } else {
-            throw new RuntimeException("Update does not have required data");
+            return parser;
         }
 
-        return parser;
+        throw new RuntimeException("Update does not have required data");
     }
 }

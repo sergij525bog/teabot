@@ -1,12 +1,12 @@
 package com.example.teabot.model.handlers;
 
-import com.example.teabot.model.ChatInfo;
 import com.example.teabot.model.Delicacy;
+import com.example.teabot.model.OrderInfo;
 import com.example.teabot.model.enums.OrderState;
 import com.example.teabot.model.enums.delicacy.DelicacyType;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
-public class DelicacyTypeHandler implements AttributeHandler {
+class DelicacyTypeHandler implements OrderAttributeHandler {
 
     @Override
     public String question() {
@@ -14,7 +14,7 @@ public class DelicacyTypeHandler implements AttributeHandler {
     }
 
     @Override
-    public OrderState processUserInput(String data, ChatInfo orderInfo) {
+    public OrderState processUserInput(String data, OrderInfo orderInfo) {
 //        todo: add string validation
         Delicacy delicacy = orderInfo.getDelicacy();
         delicacy.setType(data);

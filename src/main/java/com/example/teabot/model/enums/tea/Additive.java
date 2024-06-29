@@ -18,13 +18,6 @@ public enum Additive implements OrderParameter {
 
     private final String additive;
 
-    public static Additive getInstanceByString(String color) {
-        return Arrays.stream(values())
-                .filter(e -> e.additive.equals(color))
-                .findFirst()
-                .orElseThrow();
-    }
-
     @Override
     public Stream<String> parametersAsStream() {
         return Arrays.stream(values())

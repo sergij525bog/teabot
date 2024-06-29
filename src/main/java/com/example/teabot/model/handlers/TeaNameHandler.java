@@ -1,19 +1,19 @@
 package com.example.teabot.model.handlers;
 
-import com.example.teabot.model.ChatInfo;
+import com.example.teabot.model.OrderInfo;
 import com.example.teabot.model.Tea;
 import com.example.teabot.model.enums.OrderState;
 import com.example.teabot.model.enums.tea.TeaNames;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
-public class TeaNameHandler implements AttributeHandler {
+class TeaNameHandler implements OrderAttributeHandler {
     @Override
     public String question() {
         return "Select or input tea name";
     }
 
     @Override
-    public OrderState processUserInput(String data, ChatInfo orderInfo) {
+    public OrderState processUserInput(String data, OrderInfo orderInfo) {
         //        todo: add string validation
         Tea tea = orderInfo.getTea();
         tea.setName(data);

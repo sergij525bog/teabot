@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.EnumMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -14,7 +13,7 @@ import static com.example.teabot.model.enums.OrderState.*;
 
 @Getter
 @Setter
-public class ChatInfo {
+public class OrderInfo {
     private final Tea tea = new Tea();
     private final Cup cup = new Cup();
     private final Delicacy delicacy = new Delicacy();
@@ -22,16 +21,14 @@ public class ChatInfo {
 
     private OrderState currentState = START;
     private final EnumMap<OrderState, List<OrderState>> orderStates = new EnumMap<>(OrderState.class);
-    private final List<Integer> messageIds = new LinkedList<>();
 
-    public ChatInfo() {
+    public OrderInfo() {
         fillAlreadyKnownStates();
     }
 
     private void fillAlreadyKnownStates() {
         orderStates.put(START, asList(TEA_MAKER_BUILDING_PROPOSAL, START));
         orderStates.put(TEA_MAKER_BUILDING_PROPOSAL, asList(TEA_MAKER_BUILDING_PROPOSAL, START));
-//        orderStates.put(TEA_MAKER_SELECTING_AWAITING, asList(TEA_BUILDING_TYPE_PROPOSAL, NULL));
         orderStates.put(TEA_BUILDING_TYPE_PROPOSAL, asList(TEA_BUILDING_TYPE_PROPOSAL, NULL));
         orderStates.put(INPUT_NAME_AWAITING, asList(ADDITIONS_AWAITING, TEA_BUILDING_TYPE_PROPOSAL));
         orderStates.put(TYPE_SELECTION_AWAITING, asList(COLOR_SELECTION_AWAITING, TEA_BUILDING_TYPE_PROPOSAL));

@@ -1,13 +1,13 @@
 package com.example.teabot.model.handlers;
 
-import com.example.teabot.model.ChatInfo;
+import com.example.teabot.model.OrderInfo;
 import com.example.teabot.model.enums.OrderState;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
-public interface AttributeHandler {
+public interface OrderAttributeHandler {
     String question();
 
-    OrderState processUserInput(String data, ChatInfo orderInfo);
+    OrderState processUserInput(String data, OrderInfo orderInfo);
 
     ReplyKeyboard getMarkup();
 }

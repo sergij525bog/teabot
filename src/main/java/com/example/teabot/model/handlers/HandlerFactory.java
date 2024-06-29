@@ -1,14 +1,18 @@
 package com.example.teabot.model.handlers;
 
+import com.example.teabot.model.OrderInfo;
 import com.example.teabot.model.enums.OrderState;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.EnumMap;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class HandlerFactory {
-    private static final EnumMap<OrderState, AttributeHandler> stateHandlerMap = initializeHandlers();
+    private static final EnumMap<OrderState, OrderAttributeHandler> stateHandlerMap = initializeHandlers();
 
-    private static EnumMap<OrderState, AttributeHandler> initializeHandlers() {
-        final EnumMap<OrderState, AttributeHandler> handlers = new EnumMap<>(OrderState.class);
+    private static EnumMap<OrderState, OrderAttributeHandler> initializeHandlers() {
+        final EnumMap<OrderState, OrderAttributeHandler> handlers = new EnumMap<>(OrderState.class);
         handlers.put(OrderState.START, new StartHandler());
 
         handlers.put(OrderState.TEA_MAKER_BUILDING_PROPOSAL, new TeaMakerProposalHandler());
@@ -33,7 +37,19 @@ public class HandlerFactory {
         return handlers;
     }
 
-    public static AttributeHandler getHandlerByState(OrderState state) {
+    public static OrderAttributeHandler getHandlerByState(OrderState state) {
         return stateHandlerMap.get(state);
+    }
+
+    public static OrderAttributeHandler getErrorHandler(OrderAttributeHandler lastWorkerHandler) {
+        return new ErrorHandler(lastWorkerHandler);
+    }
+
+    public static OrderAttributeHandler getNavigationHandler() {
+        return new NavigationHandler();
+    }
+
+    public static OrderAttributeHandler getOrderSavingHandler(OrderInfo orderInfo) {
+        return new OrderSavingHandler(orderInfo);
     }
 }

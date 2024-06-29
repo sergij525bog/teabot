@@ -1,10 +1,11 @@
 package com.example.teabot.model.handlers;
 
-import com.example.teabot.model.ChatInfo;
+import com.example.teabot.model.OrderInfo;
 import com.example.teabot.model.enums.OrderState;
+import com.example.teabot.utils.StringUtil;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
-public class StartHandler implements AttributeHandler {
+class StartHandler implements OrderAttributeHandler {
 
     @Override
     public ReplyKeyboard getMarkup() {
@@ -17,11 +18,11 @@ public class StartHandler implements AttributeHandler {
     }
 
     @Override
-    public OrderState processUserInput(String data, ChatInfo orderInfo) {
-        if ("/start".equals(data) || "/start@YouAreTheTea_bot".equals(data)) {
+    public OrderState processUserInput(String data, OrderInfo orderInfo) {
+        if (StringUtil.isStartCommand(data)) {
             return OrderState.TEA_MAKER_BUILDING_PROPOSAL;
         }
 
-        return orderInfo.getCurrentState();
+        return OrderState.ERROR;
     }
 }

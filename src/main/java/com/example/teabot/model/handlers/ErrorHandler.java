@@ -1,13 +1,13 @@
 package com.example.teabot.model.handlers;
 
-import com.example.teabot.model.ChatInfo;
+import com.example.teabot.model.OrderInfo;
 import com.example.teabot.model.enums.OrderState;
 import lombok.AllArgsConstructor;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
 @AllArgsConstructor
-public class ErrorHandler implements AttributeHandler {
-    private AttributeHandler handler;
+class ErrorHandler implements OrderAttributeHandler {
+    private OrderAttributeHandler lastWorkedHandler;
 
     @Override
     public String question() {
@@ -15,12 +15,12 @@ public class ErrorHandler implements AttributeHandler {
     }
 
     @Override
-    public OrderState processUserInput(String data, ChatInfo orderInfo) {
-        return handler.processUserInput(data, orderInfo);
+    public OrderState processUserInput(String data, OrderInfo orderInfo) {
+        return lastWorkedHandler.processUserInput(data, orderInfo);
     }
 
     @Override
     public ReplyKeyboard getMarkup() {
-        return handler.getMarkup();
+        return lastWorkedHandler.getMarkup();
     }
 }
