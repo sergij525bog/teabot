@@ -1,4 +1,4 @@
-package com.example.teabot.model.handlers;
+package com.example.teabot.handlers;
 
 import com.example.teabot.model.enums.NavigationButtons;
 import com.example.teabot.model.enums.OrderParameter;

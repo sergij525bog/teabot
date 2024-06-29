@@ -1,4 +1,4 @@
-package com.example.teabot.model.handlers;
+package com.example.teabot.handlers;
 
 import com.example.teabot.model.orderInfo.OrderInfo;
 import com.example.teabot.model.enums.OrderState;

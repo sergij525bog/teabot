@@ -1,4 +1,4 @@
-package com.example.teabot.model.handlers;
+package com.example.teabot.handlers;
 
 class WithoutOrderHandler implements FinalStateHandler {
     @Override

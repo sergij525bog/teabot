@@ -5,8 +5,8 @@ import com.example.teabot.model.orderInfo.OrderInfo;
 import com.example.teabot.model.UpdateParser;
 import com.example.teabot.model.enums.NavigationButtons;
 import com.example.teabot.model.enums.OrderState;
-import com.example.teabot.model.handlers.HandlerFactory;
-import com.example.teabot.model.handlers.OrderAttributeHandler;
+import com.example.teabot.handlers.HandlerFactory;
+import com.example.teabot.handlers.OrderAttributeHandler;
 import com.example.teabot.utils.StringUtil;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
