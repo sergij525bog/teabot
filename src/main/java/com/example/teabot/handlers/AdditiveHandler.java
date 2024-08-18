@@ -1,9 +1,9 @@
 package com.example.teabot.handlers;
 
-import com.example.teabot.model.orderInfo.OrderInfo;
-import com.example.teabot.model.orderInfo.Tea;
 import com.example.teabot.model.enums.OrderState;
 import com.example.teabot.model.enums.tea.Additive;
+import com.example.teabot.model.orderInfo.OrderInfo;
+import com.example.teabot.model.orderInfo.Tea;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
 import java.util.Arrays;
@@ -20,16 +20,16 @@ class AdditiveHandler implements OrderAttributeHandler {
     }
 
     @Override
-    public OrderState processUserInput(String data, OrderInfo orderInfo) {
+    public OrderState updateOrder(OrderInfo order, String orderAttribute) {
         return Arrays.stream(Additive.values())
-                .filter(additive -> additive.getAdditive().equals(data))
+                .filter(additive -> additive.getAdditive().equals(orderAttribute))
                 .findFirst()
-                .map(additive -> updateAdditive(orderInfo, additive))
+                .map(additive -> updateAdditive(order, additive))
                 .orElse(OrderState.ERROR);
     }
 
     private OrderState updateAdditive(OrderInfo orderInfo, Additive additive) {
-        Tea tea = orderInfo.getTea();
+        final Tea tea = orderInfo.getTea();
 
         if (additive != Additive.NONE) {
             tea.getAdditives().add(additive);

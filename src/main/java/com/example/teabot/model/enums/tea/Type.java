@@ -21,4 +21,9 @@ public enum Type implements OrderParameter {
         return Arrays.stream(values())
                 .map(Type::getType);
     }
+
+    @Override
+    public String toString() {
+        return type;
+    }
 }

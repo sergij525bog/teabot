@@ -1,7 +1,7 @@
 package com.example.teabot.handlers;
 
-import com.example.teabot.model.orderInfo.OrderInfo;
 import com.example.teabot.model.enums.OrderState;
+import com.example.teabot.model.orderInfo.OrderInfo;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 
@@ -17,7 +17,7 @@ interface FinalStateHandler extends OrderAttributeHandler {
     }
 
     @Override
-    default OrderState processUserInput(String data, OrderInfo orderInfo) {
+    default OrderState updateOrder(OrderInfo order, String orderAttribute) {
         throw new UnsupportedOperationException();
     }
 }

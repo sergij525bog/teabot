@@ -22,7 +22,7 @@ class KeyboardFactory {
     public static final int GROUP_SIZE = 4;
 
     public static <T extends OrderParameter> ReplyKeyboard getKeyboardByParameter(T parameter, String placeholder) {
-        Class<? extends OrderParameter> parameterClass = parameter.getClass();
+        final Class<? extends OrderParameter> parameterClass = parameter.getClass();
         ReplyKeyboard keyboard = keyboardMap.get(parameterClass);
 
         if (keyboard == null) {
@@ -41,7 +41,7 @@ class KeyboardFactory {
     }
 
     private static <T extends OrderParameter> List<KeyboardRow> parametersRows(T parameter) {
-        AtomicInteger counter = new AtomicInteger();
+        final AtomicInteger counter = new AtomicInteger();
 
         return parameter
                 .parametersAsStream()
@@ -49,7 +49,7 @@ class KeyboardFactory {
                 .values()
                 .stream()
                 .map(chunk -> {
-                    KeyboardRow row = new KeyboardRow();
+                    final KeyboardRow row = new KeyboardRow();
                     row.addAll(chunk);
 
                     return row;
@@ -58,7 +58,7 @@ class KeyboardFactory {
     }
 
     private static KeyboardRow createNavigationRow() {
-        KeyboardRow navigationRow = new KeyboardRow();
+        final KeyboardRow navigationRow = new KeyboardRow();
 
         Arrays.stream(NavigationButtons.values())
                 .map(NavigationButtons::getNavigation)

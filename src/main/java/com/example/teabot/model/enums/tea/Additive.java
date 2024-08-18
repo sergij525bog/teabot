@@ -23,4 +23,9 @@ public enum Additive implements OrderParameter {
         return Arrays.stream(values())
                 .map(Additive::getAdditive);
     }
+
+    @Override
+    public String toString() {
+        return additive;
+    }
 }

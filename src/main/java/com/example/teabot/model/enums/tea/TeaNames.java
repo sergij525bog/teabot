@@ -23,4 +23,9 @@ public enum TeaNames implements OrderParameter {
         return Arrays.stream(values())
                 .map(TeaNames::getTeaName);
     }
+
+    @Override
+    public String toString() {
+        return teaName;
+    }
 }

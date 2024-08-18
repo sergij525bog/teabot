@@ -1,7 +1,7 @@
 package com.example.teabot.handlers;
 
-import com.example.teabot.model.orderInfo.OrderInfo;
 import com.example.teabot.model.enums.OrderState;
+import com.example.teabot.model.orderInfo.OrderInfo;
 import lombok.AllArgsConstructor;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
@@ -15,8 +15,8 @@ class ErrorHandler implements OrderAttributeHandler {
     }
 
     @Override
-    public OrderState processUserInput(String data, OrderInfo orderInfo) {
-        return lastWorkedHandler.processUserInput(data, orderInfo);
+    public OrderState updateOrder(OrderInfo order, String orderAttribute) {
+        return lastWorkedHandler.updateOrder(order, orderAttribute);
     }
 
     @Override

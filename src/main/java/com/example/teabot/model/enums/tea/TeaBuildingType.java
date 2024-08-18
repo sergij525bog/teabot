@@ -20,4 +20,9 @@ public enum TeaBuildingType implements OrderParameter {
         return Arrays.stream(values())
                 .map(TeaBuildingType::getBuildingType);
     }
+
+    @Override
+    public String toString() {
+        return buildingType;
+    }
 }

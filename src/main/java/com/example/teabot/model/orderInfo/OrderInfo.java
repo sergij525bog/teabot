@@ -4,6 +4,7 @@ import com.example.teabot.model.enums.OrderState;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,7 +44,11 @@ public class OrderInfo {
     }
 
     private static List<OrderState> asList(OrderState next, OrderState prev) {
-        return Stream.of(next, prev).collect(Collectors.toList());
+        final List<OrderState> states = new ArrayList<>(2);
+        states.add(next);
+        states.add(prev);
+
+        return states;
     }
 
     public OrderState getNextState() {

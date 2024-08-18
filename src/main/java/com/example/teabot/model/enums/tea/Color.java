@@ -21,4 +21,9 @@ public enum Color implements OrderParameter {
         return Arrays.stream(values())
                 .map(Color::getColor);
     }
+
+    @Override
+    public String toString() {
+        return color;
+    }
 }

@@ -1,24 +1,22 @@
 package com.example.teabot.bot;
 
+import com.example.teabot.handlers.HandlerFactory;
+import com.example.teabot.handlers.OrderAttributeHandler;
 import com.example.teabot.model.ChatHandler;
-import com.example.teabot.model.orderInfo.OrderInfo;
 import com.example.teabot.model.UpdateParser;
 import com.example.teabot.model.enums.NavigationButtons;
 import com.example.teabot.model.enums.OrderState;
-import com.example.teabot.handlers.HandlerFactory;
-import com.example.teabot.handlers.OrderAttributeHandler;
+import com.example.teabot.model.orderInfo.OrderInfo;
 import com.example.teabot.utils.StringUtil;
+import lombok.RequiredArgsConstructor;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@RequiredArgsConstructor
 class ChatMessageRenderer {
     private final TeaBot bot;
-
-    public ChatMessageRenderer(TeaBot bot) {
-        this.bot = bot;
-    }
 
     private static final Map<Long, OrderInfo> memberOrderInfo = new HashMap<>();
     private static final Map<Long, OrderAttributeHandler> lastWorkedHandler = new HashMap<>();
@@ -60,7 +58,7 @@ class ChatMessageRenderer {
         final OrderAttributeHandler handler = getHandler(senderId, data, currentState);
 
         if (handler != null) {
-            return handler.processUserInput(data, getChatInfo(senderId));
+            return handler.updateOrder(getChatInfo(senderId), data);
         }
 
         throw new NullPointerException("There is no actions for state " + currentState);
@@ -89,8 +87,13 @@ class ChatMessageRenderer {
         final OrderState currentState = getCurrentState(senderId);
 //        todo: this statement should always be equal to true. delete it after testing
 //        if (currentState != OrderState.START) {
-        final OrderAttributeHandler handler = getHandler(senderId, currentState);
-        ChatHandler.renderMessage(senderId, handler.question(), handler.getMarkup(), bot);
+        final var handler = getHandler(senderId, currentState);
+        ChatHandler.renderMessage(
+                senderId,
+                handler.question(),
+                handler.getMarkup(),
+                bot
+        );
 //        }
     }
 
@@ -104,7 +107,10 @@ class ChatMessageRenderer {
     }
 
     private void saveLastWorkedHandler(Long senderId, OrderState currentState) {
-        lastWorkedHandler.put(senderId, getHandler(senderId, currentState));
+        lastWorkedHandler.put(
+                senderId,
+                getHandler(senderId, currentState)
+        );
     }
 
     private OrderAttributeHandler getHandler(Long senderId, String data, OrderState state) {

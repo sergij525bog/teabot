@@ -1,9 +1,9 @@
 package com.example.teabot.handlers;
 
-import com.example.teabot.model.orderInfo.Cup;
-import com.example.teabot.model.orderInfo.OrderInfo;
 import com.example.teabot.model.enums.OrderState;
 import com.example.teabot.model.enums.cup.Name;
+import com.example.teabot.model.orderInfo.Cup;
+import com.example.teabot.model.orderInfo.OrderInfo;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
 class CupNameHandler implements OrderAttributeHandler {
@@ -14,13 +14,13 @@ class CupNameHandler implements OrderAttributeHandler {
     }
 
     @Override
-    public OrderState processUserInput(String data, OrderInfo orderInfo) {
+    public OrderState updateOrder(OrderInfo order, String orderAttribute) {
 //        todo: add string validation
-        Cup cup = orderInfo.getCup();
-        cup.setName(data);
+        final Cup cup = order.getCup();
+        cup.setName(orderAttribute);
 
-        OrderState state = OrderState.DELICACY_TYPE_AWAITING;
-        orderInfo.setPrevState(state, orderInfo.getCurrentState());
+        final OrderState state = OrderState.DELICACY_TYPE_AWAITING;
+        order.setPrevState(state, order.getCurrentState());
         return state;
     }
 

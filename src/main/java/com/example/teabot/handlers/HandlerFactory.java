@@ -1,7 +1,7 @@
 package com.example.teabot.handlers;
 
-import com.example.teabot.model.orderInfo.OrderInfo;
 import com.example.teabot.model.enums.OrderState;
+import com.example.teabot.model.orderInfo.OrderInfo;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -30,7 +30,6 @@ public class HandlerFactory {
         handlers.put(OrderState.DELICACY_TYPE_AWAITING, new DelicacyTypeHandler());
         handlers.put(OrderState.DELICACY_COUNT_AWAITING, new DelicacyCountHandler());
 
-        handlers.put(OrderState.SAVE_ORDER_AWAITING, new OrderSavingHandler());
         handlers.put(OrderState.CANCEL_ORDER, new CancelHandler());
         handlers.put(OrderState.WITHOUT_ORDER, new WithoutOrderHandler());
 

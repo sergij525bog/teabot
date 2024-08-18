@@ -49,9 +49,9 @@ public class ChatHandler {
 
     @SneakyThrows
     public static void clearChatMessages(Long senderId, TeaBot bot) {
-        List<Integer> messageIds = getSenderMessages(senderId);
+        final List<Integer> messageIds = getSenderMessages(senderId);
 
-        DeleteMessages messages = DeleteMessages.builder()
+        final DeleteMessages messages = DeleteMessages.builder()
                 .chatId(getChatId(senderId))
                 .messageIds(messageIds)
                 .build();

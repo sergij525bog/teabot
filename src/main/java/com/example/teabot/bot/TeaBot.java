@@ -1,6 +1,5 @@
 package com.example.teabot.bot;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -11,7 +10,6 @@ public class TeaBot extends TelegramLongPollingBot {
     private final Environment environment;
     private final ChatMessageRenderer handler = new ChatMessageRenderer(this);
 
-    @Autowired
     public TeaBot(Environment environment) {
         super(environment.getProperty("tea.bot.token"));
         this.environment = environment;
