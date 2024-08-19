@@ -14,7 +14,7 @@ public class UpdateParser {
     private Long chatId;
     private Long senderId;
     private Integer messageId;
-    private String data;
+    private String attributeUpdate;
 
 //    curl -X POST https://api.telegram.org/bot<bot-token>/sendMessage -H 'Content-Type: application/json' -d '{"chat_id": "<chatId>", "text": "ALERT! Root volume is about to be full"}'
 
@@ -25,7 +25,7 @@ public class UpdateParser {
             final Message message = update.getMessage();
 
             parser.chatId = message.getChatId();
-            parser.data = message.getText();
+            parser.attributeUpdate = message.getText();
             parser.senderId = message.getFrom().getId();
             parser.messageId = message.getMessageId();
 

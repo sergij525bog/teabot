@@ -14,14 +14,16 @@ class CupNameHandler implements OrderAttributeHandler {
     }
 
     @Override
-    public OrderState updateOrder(OrderInfo order, String orderAttribute) {
+    public OrderInfo updateOrder(OrderInfo order, String orderAttribute) {
 //        todo: add string validation
         final Cup cup = order.getCup();
         cup.setName(orderAttribute);
 
         final OrderState state = OrderState.DELICACY_TYPE_AWAITING;
         order.setPrevState(state, order.getCurrentState());
-        return state;
+        order.setCurrentState(state);
+
+        return order;
     }
 
     @Override

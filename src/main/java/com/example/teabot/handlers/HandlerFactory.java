@@ -37,6 +37,10 @@ public class HandlerFactory {
     }
 
     public static OrderAttributeHandler getHandlerByState(OrderState state) {
+        if (!stateHandlerMap.containsKey(state)) {
+            throw new NullPointerException("There is no handler for state " + state);
+        }
+
         return stateHandlerMap.get(state);
     }
 

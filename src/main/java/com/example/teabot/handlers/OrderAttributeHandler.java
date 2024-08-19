@@ -7,7 +7,12 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 public interface OrderAttributeHandler {
     String question();
 
-    OrderState updateOrder(OrderInfo order, String orderAttribute);
+    OrderInfo updateOrder(OrderInfo order, String orderAttribute);
 
     ReplyKeyboard getMarkup();
+
+    default OrderInfo updateOrderWithError(OrderInfo order) {
+        order.setCurrentState(OrderState.ERROR);
+        return order;
+    }
 }

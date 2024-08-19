@@ -19,21 +19,23 @@ class TeaBuildingProposalHandler implements OrderAttributeHandler {
     }
 
     @Override
-    public OrderState updateOrder(OrderInfo order, String orderAttribute) {
+    public OrderInfo updateOrder(OrderInfo order, String orderAttribute) {
         return Arrays.stream(TeaBuildingType.values())
                 .filter(type -> type.getBuildingType().equals(orderAttribute))
                 .findFirst()
                 .map(type -> updateType(order, type))
-                .orElse(OrderState.ERROR);
+                .orElseGet(() -> updateOrderWithError(order));
     }
 
-    private static OrderState updateType(OrderInfo orderInfo, TeaBuildingType type) {
+    private static OrderInfo updateType(OrderInfo order, TeaBuildingType type) {
         final OrderState state = type == TeaBuildingType.BY_DESCRIPTION ?
                 OrderState.TYPE_SELECTION_AWAITING :
                 OrderState.INPUT_NAME_AWAITING;
 
-        orderInfo.setPrevState(state, orderInfo.getCurrentState());
-        orderInfo.setNextState(state);
-        return state;
+        order.setPrevState(state, order.getCurrentState());
+        order.setNextState(state);
+        order.setCurrentState(state);
+
+        return order;
     }
 }

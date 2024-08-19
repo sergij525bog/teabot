@@ -14,16 +14,17 @@ class DelicacyTypeHandler implements OrderAttributeHandler {
     }
 
     @Override
-    public OrderState updateOrder(OrderInfo order, String orderAttribute) {
+    public OrderInfo updateOrder(OrderInfo order, String orderAttribute) {
 //        todo: add string validation
         final Delicacy delicacy = order.getDelicacy();
         delicacy.setType(orderAttribute);
 
-        if (DelicacyType.NONE.getType().equals(orderAttribute)) {
-            return OrderState.SAVE_ORDER_AWAITING;
-        }
+        final OrderState state = DelicacyType.NONE.getType().equals(orderAttribute)
+                ? OrderState.SAVE_ORDER_AWAITING
+                : OrderState.DELICACY_COUNT_AWAITING;
+        order.setCurrentState(state);
 
-        return OrderState.DELICACY_COUNT_AWAITING;
+        return order;
     }
 
     @Override

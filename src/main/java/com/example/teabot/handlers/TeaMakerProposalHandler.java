@@ -14,25 +14,27 @@ class TeaMakerProposalHandler implements OrderAttributeHandler {
     }
 
     @Override
-    public OrderState updateOrder(OrderInfo order, String orderAttribute) {
+    public OrderInfo updateOrder(OrderInfo order, String orderAttribute) {
         return Arrays.stream(MakerSelectingProposals.values())
                 .filter(proposal -> proposal.getMessage().equals(orderAttribute))
                 .findFirst()
                 .map(proposal -> updateTeaMakerAndStates(order, proposal))
-                .orElse(OrderState.ERROR);
+                .orElseGet(() -> updateOrderWithError(order));
     }
 
-    private static OrderState updateTeaMakerAndStates(OrderInfo orderInfo, MakerSelectingProposals proposal) {
-        final OrderState nextState = updateTeaMakerByProposal(orderInfo, proposal);
+    private static OrderInfo updateTeaMakerAndStates(OrderInfo order, MakerSelectingProposals proposal) {
+        final OrderState nextState = updateTeaMakerByProposal(order, proposal);
 
-        orderInfo.setNextState(nextState);
-        orderInfo.setPrevState(nextState, orderInfo.getCurrentState());
-        return nextState;
+        order.setNextState(nextState);
+        order.setPrevState(nextState, order.getCurrentState());
+        order.setCurrentState(nextState);
+
+        return order;
     }
 
-    private static OrderState updateTeaMakerByProposal(OrderInfo orderInfo, MakerSelectingProposals proposal) {
+    private static OrderState updateTeaMakerByProposal(OrderInfo order, MakerSelectingProposals proposal) {
         final boolean setTeaMaker = proposal != MakerSelectingProposals.I_WANT_TEA;
-        orderInfo.setTeaMaker(setTeaMaker);
+        order.setTeaMaker(setTeaMaker);
 
         return switch (proposal) {
             case I_CAN_MAKE_TEA -> OrderState.WITHOUT_ORDER;

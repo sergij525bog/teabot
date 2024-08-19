@@ -15,21 +15,23 @@ class CupBuildingTypeHandler implements OrderAttributeHandler {
     }
 
     @Override
-    public OrderState updateOrder(OrderInfo order, String orderAttribute) {
+    public OrderInfo updateOrder(OrderInfo order, String orderAttribute) {
         return Arrays.stream(CupBuildingType.values())
                 .filter(type -> type.getType().equals(orderAttribute))
                 .findFirst()
-                .map(type -> updateCupBuilingType(order, type))
-                .orElse(OrderState.ERROR);
+                .map(type -> updateCupBuildingType(order, type))
+                .orElseGet(() -> updateOrderWithError(order));
     }
 
-    private static OrderState updateCupBuilingType(OrderInfo orderInfo, CupBuildingType type) {
+    private static OrderInfo updateCupBuildingType(OrderInfo orderInfo, CupBuildingType type) {
         final OrderState state = type == CupBuildingType.BY_NAME ?
                 OrderState.CUP_NAME_AWAITING :
                 OrderState.CUP_SIZE_AWAITING;
-        orderInfo.setNextState(state);
 
-        return state;
+        orderInfo.setNextState(state);
+        orderInfo.setCurrentState(state);
+
+        return orderInfo;
     }
 
     @Override

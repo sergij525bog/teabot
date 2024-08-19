@@ -20,20 +20,22 @@ class ColorHandler implements OrderAttributeHandler {
     }
 
     @Override
-    public OrderState updateOrder(OrderInfo order, String orderAttribute) {
+    public OrderInfo updateOrder(OrderInfo order, String orderAttribute) {
         return Arrays.stream(Color.values())
                 .filter(color -> color.getColor().equals(orderAttribute))
                 .findFirst()
                 .map(color -> updateColor(order, color))
-                .orElse(OrderState.ERROR);
+                .orElseGet(() -> updateOrderWithError(order));
     }
 
-    private static OrderState updateColor(OrderInfo orderInfo, Color color) {
+    private static OrderInfo updateColor(OrderInfo orderInfo, Color color) {
         final Tea tea = orderInfo.getTea();
         tea.setColor(color);
 
         final OrderState state = OrderState.ADDITIONS_AWAITING;
         orderInfo.setPrevState(state, orderInfo.getCurrentState());
-        return state;
+        orderInfo.setCurrentState(state);
+
+        return orderInfo;
     }
 }

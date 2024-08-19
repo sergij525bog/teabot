@@ -8,34 +8,33 @@ import com.example.teabot.model.enums.NavigationButtons;
 import com.example.teabot.model.enums.OrderState;
 import com.example.teabot.model.orderInfo.OrderInfo;
 import com.example.teabot.utils.StringUtil;
-import lombok.RequiredArgsConstructor;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 class ChatMessageRenderer {
-    private final TeaBot bot;
-
     private static final Map<Long, OrderInfo> memberOrderInfo = new HashMap<>();
-    private static final Map<Long, OrderAttributeHandler> lastWorkedHandler = new HashMap<>();
+    private static final Map<Long, OrderAttributeHandler> handlersWithErrorState = new HashMap<>();
 
-    public void handle(Update update) {
-        processUpdate(UpdateParser.fromUpdate(update));
+    public static void handle(Update update, TeaBot bot) {
+        processUpdate(UpdateParser.fromUpdate(update), bot);
     }
 
-    private void processUpdate(UpdateParser parser) {
+    private static void processUpdate(UpdateParser parser, TeaBot bot) {
         storeOrderAndChatInfoIfNeeded(parser);
 
         final Long senderId = parser.getSenderId();
         if (memberCreatingOrder(senderId)) {
             final OrderState stateBeforeHandling = getCurrentState(senderId);
-            final OrderState newState = handleData(senderId, parser.getData());
+            final OrderState newState = updateAttribute(senderId, parser.getAttributeUpdate());
 
-            processNewState(senderId, stateBeforeHandling, newState);
+            processNewState(senderId, stateBeforeHandling, newState, bot);
 
-            renderMessage(senderId);
+            renderMessage(senderId, bot);
             clearOrderAndChatInfoIfNeeded(senderId);
         }
     }
@@ -44,7 +43,7 @@ class ChatMessageRenderer {
         final Long senderId = parser.getSenderId();
         final OrderInfo orderInfo = memberOrderInfo.get(senderId);
 
-        if (orderInfo == null && StringUtil.isStartCommand(parser.getData())) {
+        if (orderInfo == null && StringUtil.isStartCommand(parser.getAttributeUpdate())) {
             memberOrderInfo.put(senderId, new OrderInfo());
         }
 
@@ -53,29 +52,17 @@ class ChatMessageRenderer {
         }
     }
 
-    private OrderState handleData(Long senderId, String data) {
-        final OrderState currentState = getCurrentState(senderId);
-        final OrderAttributeHandler handler = getHandler(senderId, data, currentState);
-
-        if (handler != null) {
-            return handler.updateOrder(getChatInfo(senderId), data);
-        }
-
-        throw new NullPointerException("There is no actions for state " + currentState);
+    private static OrderState updateAttribute(Long senderId, String data) {
+        return getHandlerForCurrentState(senderId, data)
+                .updateOrder(getChatInfo(senderId), data)
+                .getCurrentState();
     }
 
-    private void processNewState(Long senderId, OrderState currentState, OrderState newState) {
-//        todo: this case should be impossible. delete it after testing
-//        if (newState == OrderState.START) {
-//            ChatHandler.markChatToDelete(senderId);
-//            return;
-//        }
-
+    private static void processNewState(Long senderId, OrderState lastWorkingState, OrderState newState, TeaBot bot) {
         if (newState == OrderState.ERROR) {
-            saveLastWorkedHandler(senderId, currentState);
+            saveLastActiveHandler(senderId, lastWorkingState);
+            return;
         }
-
-        setCurrentState(senderId, newState);
 
         if (OrderState.isFinalState(newState)) {
             ChatHandler.clearChatMessages(senderId, bot);
@@ -83,46 +70,48 @@ class ChatMessageRenderer {
         }
     }
 
-    private void renderMessage(Long senderId) {
-        final OrderState currentState = getCurrentState(senderId);
-//        todo: this statement should always be equal to true. delete it after testing
-//        if (currentState != OrderState.START) {
-        final var handler = getHandler(senderId, currentState);
+    private static void renderMessage(Long senderId, TeaBot bot) {
+        final var handler = getHandlerForCurrentState(senderId);
+
         ChatHandler.renderMessage(
                 senderId,
                 handler.question(),
                 handler.getMarkup(),
                 bot
         );
-//        }
     }
 
-    private void clearOrderAndChatInfoIfNeeded(Long senderId) {
+    private static void clearOrderAndChatInfoIfNeeded(Long senderId) {
         if (ChatHandler.chatShouldBeDeleted(senderId)) {
             ChatHandler.clearChatInfo(senderId);
 
             memberOrderInfo.remove(senderId);
-            lastWorkedHandler.remove(senderId);
+            handlersWithErrorState.remove(senderId);
         }
     }
 
-    private void saveLastWorkedHandler(Long senderId, OrderState currentState) {
-        lastWorkedHandler.put(
+    private static void saveLastActiveHandler(Long senderId, OrderState lastWorkingState) {
+        handlersWithErrorState.put(
                 senderId,
-                getHandler(senderId, currentState)
+                HandlerFactory.getHandlerByState(lastWorkingState)
         );
     }
 
-    private OrderAttributeHandler getHandler(Long senderId, String data, OrderState state) {
+    private static OrderAttributeHandler getHandlerForCurrentState(Long senderId, String data) {
         if (NavigationButtons.isNavigation(data)) {
             return HandlerFactory.getNavigationHandler();
         }
-        return getHandler(senderId, state);
+
+        return getHandlerForCurrentState(senderId);
     }
 
-    private OrderAttributeHandler getHandler(Long senderId, OrderState state) {
+    private static OrderAttributeHandler getHandlerForCurrentState(Long senderId) {
+        return getHandlerForState(senderId, getCurrentState(senderId));
+    }
+
+    private static OrderAttributeHandler getHandlerForState(Long senderId, OrderState state) {
         if (state == OrderState.ERROR) {
-            return HandlerFactory.getErrorHandler(lastWorkedHandler.get(senderId));
+            return HandlerFactory.getErrorHandler(handlersWithErrorState.get(senderId));
         }
 
         if (state == OrderState.SAVE_ORDER_AWAITING) {
@@ -134,10 +123,6 @@ class ChatMessageRenderer {
 
     private static boolean memberCreatingOrder(Long senderId) {
         return memberOrderInfo.containsKey(senderId);
-    }
-
-    private static void setCurrentState(Long senderId, OrderState currentState) {
-        getChatInfo(senderId).setCurrentState(currentState);
     }
 
     private static OrderState getCurrentState(Long senderId) {

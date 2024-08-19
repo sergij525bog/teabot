@@ -13,15 +13,16 @@ class TeaNameHandler implements OrderAttributeHandler {
     }
 
     @Override
-    public OrderState updateOrder(OrderInfo order, String orderAttribute) {
+    public OrderInfo updateOrder(OrderInfo order, String orderAttribute) {
         //        todo: add string validation
         final Tea tea = order.getTea();
         tea.setName(orderAttribute);
 
         final OrderState state = OrderState.ADDITIONS_AWAITING;
         order.setPrevState(state, order.getCurrentState());
+        order.setCurrentState(state);
 
-        return state;
+        return order;
     }
 
     @Override

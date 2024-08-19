@@ -12,9 +12,16 @@ class NavigationHandler implements OrderAttributeHandler {
     }
 
     @Override
-    public OrderState updateOrder(OrderInfo order, String orderAttribute) {
+    public OrderInfo updateOrder(OrderInfo order, String orderAttribute) {
         final NavigationButtons instance = NavigationButtons.getInstance(orderAttribute);
 
+        final OrderState state = calculateNewState(order, instance);
+        order.setCurrentState(state);
+
+        return order;
+    }
+
+    private static OrderState calculateNewState(OrderInfo order, NavigationButtons instance) {
         return switch (instance) {
             case NEXT -> order.getNextState();
             case BACK -> order.getPrevState();

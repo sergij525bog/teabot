@@ -15,21 +15,23 @@ class CupSizeHandler implements OrderAttributeHandler {
     }
 
     @Override
-    public OrderState updateOrder(OrderInfo order, String orderAttribute) {
+    public OrderInfo updateOrder(OrderInfo order, String orderAttribute) {
         return Arrays.stream(Size.values())
                 .filter(size -> size.getSize().equals(orderAttribute))
                 .findFirst()
                 .map(size -> updateCupSize(orderAttribute, order))
-                .orElse(OrderState.ERROR);
+                .orElseGet(() -> updateOrderWithError(order));
     }
 
-    private static OrderState updateCupSize(String data, OrderInfo orderInfo) {
-        final Cup cup = orderInfo.getCup();
+    private static OrderInfo updateCupSize(String data, OrderInfo order) {
+        final Cup cup = order.getCup();
         cup.setSize(data);
 
         final OrderState state = OrderState.DELICACY_TYPE_AWAITING;
-        orderInfo.setPrevState(state, orderInfo.getCurrentState());
-        return state;
+        order.setPrevState(state, order.getCurrentState());
+        order.setCurrentState(state);
+
+        return order;
     }
 
     @Override

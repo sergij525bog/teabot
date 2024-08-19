@@ -8,7 +8,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Component
 public class TeaBot extends TelegramLongPollingBot {
     private final Environment environment;
-    private final ChatMessageRenderer handler = new ChatMessageRenderer(this);
 
     public TeaBot(Environment environment) {
         super(environment.getProperty("tea.bot.token"));
@@ -17,7 +16,7 @@ public class TeaBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        handler.handle(update);
+        ChatMessageRenderer.handle(update, this);
     }
 
     @Override

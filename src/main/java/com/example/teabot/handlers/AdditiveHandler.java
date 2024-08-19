@@ -20,23 +20,25 @@ class AdditiveHandler implements OrderAttributeHandler {
     }
 
     @Override
-    public OrderState updateOrder(OrderInfo order, String orderAttribute) {
+    public OrderInfo updateOrder(OrderInfo order, String orderAttribute) {
         return Arrays.stream(Additive.values())
                 .filter(additive -> additive.getAdditive().equals(orderAttribute))
                 .findFirst()
                 .map(additive -> updateAdditive(order, additive))
-                .orElse(OrderState.ERROR);
+                .orElseGet(() -> updateOrderWithError(order));
     }
 
-    private OrderState updateAdditive(OrderInfo orderInfo, Additive additive) {
+    private OrderInfo updateAdditive(OrderInfo orderInfo, Additive additive) {
         final Tea tea = orderInfo.getTea();
 
         if (additive != Additive.NONE) {
             tea.getAdditives().add(additive);
-            return OrderState.ADDITIONS_AWAITING;
+            orderInfo.setCurrentState(OrderState.ADDITIONS_AWAITING);
+        } else {
+            tea.getAdditives().clear();
+            orderInfo.setCurrentState(OrderState.CUP_BUILDING_TYPE_PROPOSAL);
         }
 
-        tea.getAdditives().clear();
-        return OrderState.CUP_BUILDING_TYPE_PROPOSAL;
+        return orderInfo;
     }
 }

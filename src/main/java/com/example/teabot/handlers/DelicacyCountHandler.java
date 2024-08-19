@@ -16,12 +16,19 @@ class DelicacyCountHandler implements OrderAttributeHandler {
     }
 
     @Override
-    public OrderState updateOrder(OrderInfo order, String orderAttribute) {
+    public OrderInfo updateOrder(OrderInfo order, String orderAttribute) {
         //        todo: add string validation
         final Delicacy delicacy = order.getDelicacy();
-        delicacy.setCount(Byte.parseByte(orderAttribute));
+        final byte count = Byte.parseByte(orderAttribute);
 
-        return OrderState.SAVE_ORDER_AWAITING;
+        if (count < Delicacy.MIN || count > Delicacy.MAX) {
+            return updateOrderWithError(order);
+        }
+
+        delicacy.setCount(count);
+        order.setCurrentState(OrderState.SAVE_ORDER_AWAITING);
+
+        return order;
     }
 
     @Override

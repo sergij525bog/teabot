@@ -9,23 +9,27 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import java.util.Arrays;
 
 class TeaTypeHandler implements OrderAttributeHandler {
-        @Override
+    @Override
     public String question() {
         return "Select tea type";
     }
 
     @Override
-    public OrderState updateOrder(OrderInfo order, String orderAttribute) {
+    public OrderInfo updateOrder(OrderInfo order, String orderAttribute) {
         return Arrays.stream(Type.values())
                 .filter(type -> type.getType().equals(orderAttribute))
                 .findFirst()
-                .map(type -> {
-                    final Tea tea = order.getTea();
-                    tea.setType(type);
+                .map(type -> updateTeaColor(order, type))
+                .orElseGet(() -> updateOrderWithError(order));
+    }
 
-                    return OrderState.COLOR_SELECTION_AWAITING;
-                })
-                .orElse(OrderState.ERROR);
+    private static OrderInfo updateTeaColor(OrderInfo order, Type type) {
+        final Tea tea = order.getTea();
+        tea.setType(type);
+
+        order.setCurrentState(OrderState.COLOR_SELECTION_AWAITING);
+
+        return order;
     }
 
     @Override

@@ -16,6 +16,9 @@ public final class Delicacy {
     private String type;
     private byte count;
 
+    public static final byte MIN = 1;
+    public static final byte MAX = 5;
+
     @Override
     public String toString() {
         String delicacyCount = count > 0 ? count + "" : null;
@@ -30,6 +33,13 @@ public final class Delicacy {
                 .sorted(Map.Entry.comparingByKey())
                 .map(e -> e.getKey().substring(1) + ": " + e.getValue())
                 .collect(Collectors.joining(", "));
+    }
+
+    public void setCount(byte count) {
+        if (count < MIN || count > MAX) {
+            throw new IllegalArgumentException(
+                    String.format("Count should be between %d and %d", MIN, MAX));
+        }
     }
 
     public void setDefaults() {

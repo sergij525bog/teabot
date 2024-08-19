@@ -18,11 +18,12 @@ class StartHandler implements OrderAttributeHandler {
     }
 
     @Override
-    public OrderState updateOrder(OrderInfo order, String orderAttribute) {
-        if (StringUtil.isStartCommand(orderAttribute)) {
-            return OrderState.TEA_MAKER_BUILDING_PROPOSAL;
-        }
+    public OrderInfo updateOrder(OrderInfo order, String orderAttribute) {
+        final OrderState state = StringUtil.isStartCommand(orderAttribute)
+                ? OrderState.TEA_MAKER_BUILDING_PROPOSAL
+                : OrderState.ERROR;
+        order.setCurrentState(state);
 
-        return OrderState.ERROR;
+        return order;
     }
 }
