@@ -1,10 +1,10 @@
 package com.example.teabot.bot;
 
-import com.example.teabot.handlers.HandlerFactory;
-import com.example.teabot.handlers.OrderAttributeHandler;
+import com.example.teabot.handlers.StateView;
+import com.example.teabot.handlers.UserInputHandler;
+import com.example.teabot.views.StateViewFactory;
 import com.example.teabot.model.ChatHandler;
 import com.example.teabot.model.UpdateParser;
-import com.example.teabot.model.enums.NavigationButtons;
 import com.example.teabot.model.enums.OrderState;
 import com.example.teabot.model.orderInfo.OrderInfo;
 import com.example.teabot.utils.StringUtil;
@@ -18,7 +18,6 @@ import java.util.Map;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 class ChatMessageRenderer {
     private static final Map<Long, OrderInfo> memberOrderInfo = new HashMap<>();
-    private static final Map<Long, OrderAttributeHandler> handlersWithErrorState = new HashMap<>();
 
     public static void handle(Update update, TeaBot bot) {
         processUpdate(UpdateParser.fromUpdate(update), bot);
@@ -29,10 +28,11 @@ class ChatMessageRenderer {
 
         final Long senderId = parser.getSenderId();
         if (memberCreatingOrder(senderId)) {
-            final OrderState stateBeforeHandling = getCurrentState(senderId);
-            final OrderState newState = updateAttribute(senderId, parser.getAttributeUpdate());
+            final OrderState newState = UserInputHandler
+                    .handle(getChatInfo(senderId), parser.getAttributeUpdate())
+                    .getCurrentState();
 
-            processNewState(senderId, stateBeforeHandling, newState, bot);
+            processNewState(senderId, newState, bot);
 
             renderMessage(senderId, bot);
             clearOrderAndChatInfoIfNeeded(senderId);
@@ -52,31 +52,21 @@ class ChatMessageRenderer {
         }
     }
 
-    private static OrderState updateAttribute(Long senderId, String data) {
-        return getHandlerForCurrentState(senderId, data)
-                .updateOrder(getChatInfo(senderId), data)
-                .getCurrentState();
-    }
-
-    private static void processNewState(Long senderId, OrderState lastWorkingState, OrderState newState, TeaBot bot) {
-        if (newState == OrderState.ERROR) {
-            saveLastActiveHandler(senderId, lastWorkingState);
-            return;
-        }
-
-        if (OrderState.isFinalState(newState)) {
+    private static void processNewState(Long senderId, OrderState newState, TeaBot bot) {
+        if (OrderState.isFinal(newState)) {
             ChatHandler.clearChatMessages(senderId, bot);
             ChatHandler.markChatToDelete(senderId);
         }
     }
 
     private static void renderMessage(Long senderId, TeaBot bot) {
-        final var handler = getHandlerForCurrentState(senderId);
+        final var view = getView(senderId, getCurrentState(senderId));
+//        final var view = getHandlerForState(senderId, getCurrentState(senderId));
 
         ChatHandler.renderMessage(
                 senderId,
-                handler.question(),
-                handler.getMarkup(),
+                view.question(),
+                view.getMarkup(),
                 bot
         );
     }
@@ -86,39 +76,19 @@ class ChatMessageRenderer {
             ChatHandler.clearChatInfo(senderId);
 
             memberOrderInfo.remove(senderId);
-            handlersWithErrorState.remove(senderId);
         }
     }
 
-    private static void saveLastActiveHandler(Long senderId, OrderState lastWorkingState) {
-        handlersWithErrorState.put(
-                senderId,
-                HandlerFactory.getHandlerByState(lastWorkingState)
-        );
-    }
-
-    private static OrderAttributeHandler getHandlerForCurrentState(Long senderId, String data) {
-        if (NavigationButtons.isNavigation(data)) {
-            return HandlerFactory.getNavigationHandler();
-        }
-
-        return getHandlerForCurrentState(senderId);
-    }
-
-    private static OrderAttributeHandler getHandlerForCurrentState(Long senderId) {
-        return getHandlerForState(senderId, getCurrentState(senderId));
-    }
-
-    private static OrderAttributeHandler getHandlerForState(Long senderId, OrderState state) {
+    private static StateView getView(Long senderId, OrderState state) {
         if (state == OrderState.ERROR) {
-            return HandlerFactory.getErrorHandler(handlersWithErrorState.get(senderId));
+            return StateViewFactory.getErrorView(getChatInfo(senderId));
         }
 
         if (state == OrderState.SAVE_ORDER_AWAITING) {
-            return HandlerFactory.getOrderSavingHandler(getChatInfo(senderId));
+            return StateViewFactory.getOrderSavingView(getChatInfo(senderId));
         }
 
-        return HandlerFactory.getHandlerByState(state);
+        return StateViewFactory.getViewByState(state);
     }
 
     private static boolean memberCreatingOrder(Long senderId) {
@@ -130,7 +100,7 @@ class ChatMessageRenderer {
     }
 
     private static OrderInfo getChatInfo(Long senderId) {
-        OrderInfo info = memberOrderInfo.get(senderId);
+        final OrderInfo info = memberOrderInfo.get(senderId);
         if (info != null) {
             return info;
         }

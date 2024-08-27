@@ -1,5 +1,6 @@
 package com.example.teabot.model.orderInfo;
 
+import com.example.teabot.model.enums.delicacy.DelicacyCount;
 import com.example.teabot.model.enums.delicacy.DelicacyType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,18 +14,18 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public final class Delicacy {
-    private String type;
-    private byte count;
+    private DelicacyType type;
+    private DelicacyCount count;
 
     public static final byte MIN = 1;
     public static final byte MAX = 5;
 
     @Override
     public String toString() {
-        String delicacyCount = count > 0 ? count + "" : null;
+        String delicacyCount = count != null ? count.getValue() + "" : null;
 
         Map<String, String> fields = new HashMap<>();
-        fields.put("1type", type);
+        fields.put("1type", type.getType());
         fields.put("2count", delicacyCount);
 
         return fields.entrySet()
@@ -35,17 +36,10 @@ public final class Delicacy {
                 .collect(Collectors.joining(", "));
     }
 
-    public void setCount(byte count) {
-        if (count < MIN || count > MAX) {
-            throw new IllegalArgumentException(
-                    String.format("Count should be between %d and %d", MIN, MAX));
-        }
-    }
-
     public void setDefaults() {
         if (type == null) {
-            type = DelicacyType.NONE.getType();
-            count = 0;
+            type = DelicacyType.NONE;
+            count = DelicacyCount.ZERO;
         }
     }
 }

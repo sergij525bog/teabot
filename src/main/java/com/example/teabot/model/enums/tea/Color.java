@@ -1,6 +1,6 @@
 package com.example.teabot.model.enums.tea;
 
-import com.example.teabot.model.enums.OrderParameter;
+import com.example.teabot.model.enums.OrderAttribute;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Getter
-public enum Color implements OrderParameter {
+public enum Color implements OrderAttribute {
     GREEN("green"),
     BLACK("black"),
     NO_MATTER("no matter");
@@ -17,7 +17,7 @@ public enum Color implements OrderParameter {
     private final String color;
 
     @Override
-    public Stream<String> parametersAsStream() {
+    public Stream<String> attributesAsStream() {
         return Arrays.stream(values())
                 .map(Color::getColor);
     }

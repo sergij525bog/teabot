@@ -7,8 +7,6 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.example.teabot.model.enums.OrderState.*;
 
@@ -27,20 +25,24 @@ public class OrderInfo {
         fillAlreadyKnownStates();
     }
 
+    private EnumMap<OrderState, List<OrderState>> getOrderStates() {
+        return orderStates;
+    }
+
     private void fillAlreadyKnownStates() {
-        orderStates.put(START, asList(TEA_MAKER_BUILDING_PROPOSAL, START));
-        orderStates.put(TEA_MAKER_BUILDING_PROPOSAL, asList(TEA_MAKER_BUILDING_PROPOSAL, START));
-        orderStates.put(TEA_BUILDING_TYPE_PROPOSAL, asList(TEA_BUILDING_TYPE_PROPOSAL, NULL));
-        orderStates.put(INPUT_NAME_AWAITING, asList(ADDITIONS_AWAITING, TEA_BUILDING_TYPE_PROPOSAL));
-        orderStates.put(TYPE_SELECTION_AWAITING, asList(COLOR_SELECTION_AWAITING, TEA_BUILDING_TYPE_PROPOSAL));
-        orderStates.put(COLOR_SELECTION_AWAITING, asList(ADDITIONS_AWAITING, TYPE_SELECTION_AWAITING));
-        orderStates.put(ADDITIONS_AWAITING, asList(CUP_BUILDING_TYPE_PROPOSAL, NULL));
+        orderStates.put(START, asList(START, START));
+        orderStates.put(TEA_MAKER_BUILDING_PROPOSAL, asList(TEA_MAKER_BUILDING_PROPOSAL, TEA_MAKER_BUILDING_PROPOSAL));
+        orderStates.put(TEA_BUILDING_TYPE_PROPOSAL, asList(TEA_BUILDING_TYPE_PROPOSAL, TEA_MAKER_BUILDING_PROPOSAL));
+        orderStates.put(INPUT_NAME_AWAITING, asList(INPUT_NAME_AWAITING, TEA_BUILDING_TYPE_PROPOSAL));
+        orderStates.put(TYPE_SELECTION_AWAITING, asList(TYPE_SELECTION_AWAITING, TEA_BUILDING_TYPE_PROPOSAL));
+        orderStates.put(COLOR_SELECTION_AWAITING, asList(COLOR_SELECTION_AWAITING, TYPE_SELECTION_AWAITING));
+        orderStates.put(ADDITIONS_AWAITING, asList(ADDITIONS_AWAITING, NULL));
         orderStates.put(CUP_BUILDING_TYPE_PROPOSAL, asList(CUP_BUILDING_TYPE_PROPOSAL, ADDITIONS_AWAITING));
-        orderStates.put(CUP_SIZE_AWAITING, asList(DELICACY_TYPE_AWAITING, CUP_BUILDING_TYPE_PROPOSAL));
-        orderStates.put(CUP_NAME_AWAITING, asList(DELICACY_TYPE_AWAITING, CUP_BUILDING_TYPE_PROPOSAL));
-        orderStates.put(DELICACY_TYPE_AWAITING, asList(DELICACY_COUNT_AWAITING, NULL));
-        orderStates.put(DELICACY_COUNT_AWAITING, asList(SAVE_ORDER_AWAITING, DELICACY_TYPE_AWAITING));
-        orderStates.put(WITHOUT_ORDER, asList(WITHOUT_ORDER, NULL));
+        orderStates.put(CUP_SIZE_AWAITING, asList(CUP_SIZE_AWAITING, CUP_BUILDING_TYPE_PROPOSAL));
+        orderStates.put(CUP_NAME_AWAITING, asList(CUP_NAME_AWAITING, CUP_BUILDING_TYPE_PROPOSAL));
+        orderStates.put(DELICACY_TYPE_AWAITING, asList(DELICACY_TYPE_AWAITING, NULL));
+        orderStates.put(DELICACY_COUNT_AWAITING, asList(DELICACY_COUNT_AWAITING, DELICACY_TYPE_AWAITING));
+        orderStates.put(ERROR, asList(ERROR, NULL));
     }
 
     private static List<OrderState> asList(OrderState next, OrderState prev) {
@@ -64,7 +66,10 @@ public class OrderInfo {
     }
 
     public void setNextState(OrderState currentState, OrderState nextState) {
-        getOrderStates(currentState).set(0, nextState);
+        final OrderState state = nextState != ERROR
+                ? nextState
+                : getNextState(getPrevState(nextState));
+        getOrderStates(currentState).set(0, state);
     }
 
     public OrderState getPrevState() {
@@ -80,7 +85,10 @@ public class OrderInfo {
     }
 
     public void setPrevState(OrderState currentState, OrderState prevState) {
-        getOrderStates(currentState).set(1, prevState);
+        final OrderState state = prevState != ERROR
+                ? prevState
+                : getPrevState(prevState);
+        getOrderStates(currentState).set(1, state);
     }
 
     private List<OrderState> getOrderStates(OrderState currentState) {

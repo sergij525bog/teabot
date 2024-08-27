@@ -21,7 +21,7 @@ public enum NavigationButtons {
     }
 
     public static boolean isNavigation(String data) {
-        return Arrays.stream(NavigationButtons.values())
+        return Arrays.stream(values())
                 .map(NavigationButtons::getNavigation)
                 .anyMatch((navigation -> navigation.equals(data)));
     }

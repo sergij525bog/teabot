@@ -14,13 +14,16 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public final class Cup {
-    private String name;
+    private Name name;
     private String size;
 
     @Override
     public String toString() {
         Map<String, String> fields = new HashMap<>();
-        fields.put("1name", name);
+        if (name != null) {
+            fields.put("1name", name.getName());
+        }
+
         fields.put("2size", size);
 
         return fields.entrySet()
@@ -33,7 +36,7 @@ public final class Cup {
 
     public void setDefaults() {
         if (name == null) {
-            name = Name.OPTIMIST.getName();
+            name = Name.OPTIMIST;
         } else if (size == null) {
             size = Size.BIG.getSize();
         }

@@ -26,7 +26,7 @@ public enum OrderState {
     ERROR,
     NULL;
 
-    public static boolean isFinalState(OrderState state) {
+    public static boolean isFinal(OrderState state) {
         return state == SAVE_ORDER_AWAITING ||
                 state == CANCEL_ORDER ||
                 state == WITHOUT_ORDER;

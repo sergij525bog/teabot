@@ -1,6 +1,6 @@
 package com.example.teabot.model.enums.teamaker;
 
-import com.example.teabot.model.enums.OrderParameter;
+import com.example.teabot.model.enums.OrderAttribute;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Getter
-public enum MakerSelectingProposals implements OrderParameter {
+public enum MakerSelectingProposals implements OrderAttribute {
     I_WANT_TEA("I want tea"),
     I_CAN_MAKE_TEA("I can make tea"),
     I_WANT_TEA_AND_CAN_MAKE_IT("I will make tea for myself and can make for others");
@@ -17,7 +17,7 @@ public enum MakerSelectingProposals implements OrderParameter {
     private final String message;
 
     @Override
-    public Stream<String> parametersAsStream() {
+    public Stream<String> attributesAsStream() {
         return Arrays.stream(values())
                 .map(MakerSelectingProposals::getMessage);
     }

@@ -1,6 +1,6 @@
 package com.example.teabot.model.enums.tea;
 
-import com.example.teabot.model.enums.OrderParameter;
+import com.example.teabot.model.enums.OrderAttribute;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -9,20 +9,20 @@ import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Getter
-public enum TeaBuildingType implements OrderParameter {
+public enum TeaBuildingType implements OrderAttribute {
     BY_NAME("Input tea name"),
     BY_DESCRIPTION("Describe tea");
 
-    private final String buildingType;
+    private final String value;
 
     @Override
-    public Stream<String> parametersAsStream() {
+    public Stream<String> attributesAsStream() {
         return Arrays.stream(values())
-                .map(TeaBuildingType::getBuildingType);
+                .map(TeaBuildingType::getValue);
     }
 
     @Override
     public String toString() {
-        return buildingType;
+        return value;
     }
 }
