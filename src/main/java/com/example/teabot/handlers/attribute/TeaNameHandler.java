@@ -10,7 +10,10 @@ class TeaNameHandler implements OrderAttributeHandler<TeaName> {
     @Override
     public OrderInfo updateOrder(OrderInfo order, TeaName attribute) {
         final Tea tea = order.getTea();
+
         tea.setName(attribute.getValue());
+        tea.setColor(null);
+        tea.setType(null);
 
         return order;
     }

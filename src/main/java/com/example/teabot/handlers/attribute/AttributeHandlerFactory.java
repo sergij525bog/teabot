@@ -1,6 +1,5 @@
 package com.example.teabot.handlers.attribute;
 
-import com.example.teabot.handlers.NavigationHandler;
 import com.example.teabot.handlers.OrderAttributeHandler;
 import com.example.teabot.model.enums.OrderAttribute;
 import com.example.teabot.model.enums.OrderState;
@@ -17,17 +16,18 @@ public class AttributeHandlerFactory {
     private static EnumMap<OrderState, OrderAttributeHandler<? extends OrderAttribute>> initializeHandlers() {
         final EnumMap<OrderState, OrderAttributeHandler<? extends OrderAttribute>> handlers =
                 new EnumMap<>(OrderState.class);
-        handlers.put(OrderState.START, new StartHandler());
+        final NullHandler nullHandler = new NullHandler();
+        handlers.put(OrderState.START, nullHandler);
+        handlers.put(OrderState.TEA_BUILDING_TYPE_PROPOSAL, nullHandler);
+        handlers.put(OrderState.CUP_BUILDING_TYPE_PROPOSAL, nullHandler);
 
         handlers.put(OrderState.TEA_MAKER_BUILDING_PROPOSAL, new TeaMakerProposalHandler());
 
-        handlers.put(OrderState.TEA_BUILDING_TYPE_PROPOSAL, new TeaBuildingProposalHandler());
         handlers.put(OrderState.INPUT_NAME_AWAITING, new TeaNameHandler());
         handlers.put(OrderState.TYPE_SELECTION_AWAITING, new TeaTypeHandler());
         handlers.put(OrderState.COLOR_SELECTION_AWAITING, new ColorHandler());
         handlers.put(OrderState.ADDITIONS_AWAITING, new AdditiveHandler());
 
-        handlers.put(OrderState.CUP_BUILDING_TYPE_PROPOSAL, new CupBuildingTypeHandler());
         handlers.put(OrderState.CUP_NAME_AWAITING, new CupNameHandler());
         handlers.put(OrderState.CUP_SIZE_AWAITING, new CupSizeHandler());
 
@@ -43,9 +43,5 @@ public class AttributeHandlerFactory {
         }
 
         return (OrderAttributeHandler<T>) handlers.get(state);
-    }
-
-    public static NavigationHandler getNavigationHandler() {
-        return new NavigationHandler();
     }
 }

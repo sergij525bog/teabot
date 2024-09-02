@@ -1,35 +1,48 @@
 package com.example.teabot.handlers.attribute;
 
 import com.example.teabot.handlers.OrderAttributeHandler;
-import com.example.teabot.model.enums.OrderState;
+import com.example.teabot.model.enums.tea.Color;
 import com.example.teabot.model.enums.tea.TeaName;
+import com.example.teabot.model.enums.tea.Type;
 import com.example.teabot.model.orderInfo.OrderInfo;
+import com.example.teabot.model.orderInfo.Tea;
+import com.example.teabot.utils.TestUtils;
 import org.junit.jupiter.api.Test;
 
-import java.util.Random;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class TeaNameHandlerTest {
 
-    private final OrderAttributeHandler handler = new TeaNameHandler();
-
-    @Test
-    void isShouldReturnErrorStateIsDataIsIncorrect() {
-        final OrderInfo order = handler.updateOrder(new OrderInfo(), "");
-
-        assertEquals(OrderState.ERROR, order.getCurrentState());
-    }
+    private final OrderAttributeHandler<TeaName> nameHandler = new TeaNameHandler();
+    private final OrderAttributeHandler<Type> typeHandler = new TeaTypeHandler();
+    private final OrderAttributeHandler<Color> colorHandler = new ColorHandler();
 
     @Test
     void itShouldReturnAdditionAwaitingState() {
-        final TeaName[] teaNames = TeaName.values();
-        final int index = new Random().nextInt(0, teaNames.length);
-        final OrderInfo order1 = handler.updateOrder(new OrderInfo(), teaNames[index].getValue());
+        final TeaName teaName = TestUtils.getRandomAttribute(TeaName.values());
+        final OrderInfo order = nameHandler.updateOrder(new OrderInfo(), teaName);
 
-        final OrderInfo order2 = handler.updateOrder(new OrderInfo(), "some tea name");
+        assertEquals(teaName.getValue(), order.getTea().getName());
+    }
 
-        assertEquals(OrderState.ADDITIONS_AWAITING, order1.getCurrentState());
-        assertEquals(OrderState.ADDITIONS_AWAITING, order2.getCurrentState());
+    @Test
+    void itShouldRemoveTypeAndColorWhenNameSaved() {
+        final Type type = TestUtils.getRandomAttribute(Type.values());
+        final Color color = TestUtils.getRandomAttribute(Color.values());
+        final TeaName teaName = TestUtils.getRandomAttribute(TeaName.values());
+
+        OrderInfo order = typeHandler.updateOrder(new OrderInfo(), type);
+        order = colorHandler.updateOrder(order, color);
+
+        final Tea tea = order.getTea();
+        assertEquals(type, tea.getType());
+        assertEquals(color, tea.getColor());
+
+        order = nameHandler.updateOrder(order, teaName);
+
+        assertEquals(teaName.getValue(), tea.getName());
+        assertNull(tea.getColor());
+        assertNull(tea.getType());
     }
 }

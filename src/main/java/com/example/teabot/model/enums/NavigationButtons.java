@@ -4,10 +4,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Getter
-public enum NavigationButtons {
+public enum NavigationButtons implements OrderAttribute {
     NEXT("next"),
     BACK("back"),
     CANCEL("cancel"),
@@ -31,5 +32,11 @@ public enum NavigationButtons {
                 .filter(b -> b.navigation.equals(s))
                 .findFirst()
                 .orElseThrow();
+    }
+
+    @Override
+    public Stream<String> attributesAsStream() {
+        return Stream.of(values())
+                .map(NavigationButtons::getNavigation);
     }
 }

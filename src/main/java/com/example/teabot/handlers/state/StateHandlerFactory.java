@@ -1,6 +1,7 @@
 package com.example.teabot.handlers.state;
 
 import com.example.teabot.handlers.OrderStateHandler;
+import com.example.teabot.model.enums.NavigationButtons;
 import com.example.teabot.model.enums.OrderAttribute;
 import com.example.teabot.model.enums.OrderState;
 import lombok.AccessLevel;
@@ -12,6 +13,7 @@ import java.util.EnumMap;
 public class StateHandlerFactory {
 
     private static final EnumMap<OrderState, OrderStateHandler<? extends OrderAttribute>> handlers = initializeMap();
+    private static final OrderStateHandler<NavigationButtons> NAVIGATION_HANDLER = new NavigationHandler();
 
     private static EnumMap<OrderState, OrderStateHandler<? extends OrderAttribute>> initializeMap() {
         final EnumMap<OrderState, OrderStateHandler<? extends OrderAttribute>> map = new EnumMap<>(OrderState.class);
@@ -43,5 +45,9 @@ public class StateHandlerFactory {
         }
 
         return (OrderStateHandler<T>) handlers.get(state);
+    }
+
+    public static OrderStateHandler<NavigationButtons> getNavigationHandler() {
+        return NAVIGATION_HANDLER;
     }
 }

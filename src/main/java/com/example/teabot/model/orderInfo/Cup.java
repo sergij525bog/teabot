@@ -1,7 +1,7 @@
 package com.example.teabot.model.orderInfo;
 
-import com.example.teabot.model.enums.cup.Name;
-import com.example.teabot.model.enums.cup.Size;
+import com.example.teabot.model.enums.cup.CupName;
+import com.example.teabot.model.enums.cup.CupSize;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,14 +14,14 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public final class Cup {
-    private Name name;
+    private CupName cupName;
     private String size;
 
     @Override
     public String toString() {
         Map<String, String> fields = new HashMap<>();
-        if (name != null) {
-            fields.put("1name", name.getName());
+        if (cupName != null) {
+            fields.put("1name", cupName.getName());
         }
 
         fields.put("2size", size);
@@ -35,10 +35,10 @@ public final class Cup {
     }
 
     public void setDefaults() {
-        if (name == null) {
-            name = Name.OPTIMIST;
+        if (cupName == null) {
+            cupName = CupName.OPTIMIST;
         } else if (size == null) {
-            size = Size.BIG.getSize();
+            size = CupSize.BIG.getSize();
         }
     }
 }

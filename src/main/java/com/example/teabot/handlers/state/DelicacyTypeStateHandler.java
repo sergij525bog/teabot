@@ -11,7 +11,13 @@ class DelicacyTypeStateHandler implements OrderStateHandler<DelicacyType> {
         final OrderState state = DelicacyType.NONE == param
                 ? OrderState.SAVE_ORDER_AWAITING
                 : OrderState.DELICACY_COUNT_AWAITING;
+
+        OrderState currentState = order.getCurrentState();
         order.setCurrentState(state);
+
+        if (!OrderState.isFinal(state)) {
+            order.setPrevState(currentState);
+        }
 
         return order;
     }

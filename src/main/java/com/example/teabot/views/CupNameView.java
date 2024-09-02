@@ -1,7 +1,7 @@
 package com.example.teabot.views;
 
 import com.example.teabot.handlers.StateView;
-import com.example.teabot.model.enums.cup.Name;
+import com.example.teabot.model.enums.cup.CupName;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
 class CupNameView implements StateView {
@@ -13,6 +13,6 @@ class CupNameView implements StateView {
 
     @Override
     public ReplyKeyboard getMarkup() {
-        return KeyboardFactory.getKeyboardByParameter(Name.BIG_BLUE, question());
+        return KeyboardFactory.getKeyboardByParameter(CupName.BIG_BLUE, question());
     }
 }

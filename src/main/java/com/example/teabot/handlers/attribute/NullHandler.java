@@ -1,13 +1,13 @@
 package com.example.teabot.handlers.attribute;
 
 import com.example.teabot.handlers.OrderAttributeHandler;
-import com.example.teabot.model.enums.StartCommand;
+import com.example.teabot.model.enums.OrderAttribute;
 import com.example.teabot.model.orderInfo.OrderInfo;
 
-public class StartHandler implements OrderAttributeHandler<StartCommand> {
+class NullHandler implements OrderAttributeHandler<OrderAttribute> {
 
     @Override
-    public OrderInfo updateOrder(OrderInfo order, StartCommand attribute) {
+    public OrderInfo updateOrder(OrderInfo order, OrderAttribute attribute) {
         return order;
     }
 }

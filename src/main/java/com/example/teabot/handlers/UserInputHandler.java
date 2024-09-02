@@ -16,35 +16,45 @@ public class UserInputHandler {
 
     public static OrderInfo handle(OrderInfo order, String input) {
         if (NavigationButtons.isNavigation(input)) {
-            return AttributeHandlerFactory
+            return StateHandlerFactory
                     .getNavigationHandler()
-                    .updateOrder(order, input);
+                    .updateOrderState(order, NavigationButtons.getInstance(input));
         }
 
-        final OrderState currentState = order.getCurrentState();
-        final OrderState state = currentState != ERROR
-                ? currentState
-                : order.getPrevState();
+        final OrderState state = getWorkingState(order);
 
         return AttributeResolver.resolve(state, input)
                 .map(attribute -> doUpdate(order, state, attribute))
                 .orElseGet(() -> updateOrderWithError(order));
     }
 
-    private static <T extends OrderAttribute> OrderInfo doUpdate(OrderInfo order, OrderState state, T attribute) {
+    private static <T extends OrderAttribute> OrderInfo doUpdate(
+            OrderInfo order,
+            final OrderState state,
+            final T attribute
+    ) {
         final var attributeHandler = AttributeHandlerFactory.getHandlerByState(state);
         final var stateHandler = StateHandlerFactory.getHandlerByState(state);
 
-        final OrderInfo orderInfo = attributeHandler.updateOrder(order, attribute);
-        return stateHandler.updateOrderState(orderInfo, attribute);
+        order = attributeHandler.updateOrder(order, attribute);
+        return stateHandler.updateOrderState(order, attribute);
     }
 
     private static OrderInfo updateOrderWithError(OrderInfo order) {
         final OrderState state = order.getCurrentState();
-        order.setCurrentState(OrderState.ERROR);
+
         if (state != ERROR) {
+            order.setCurrentState(OrderState.ERROR);
             order.setPrevState(state);
         }
+
         return order;
+    }
+
+    private static OrderState getWorkingState(OrderInfo order) {
+        final OrderState currentState = order.getCurrentState();
+        return currentState != ERROR
+                ? currentState
+                : order.getPrevState();
     }
 }

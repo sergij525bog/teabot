@@ -1,5 +1,6 @@
-package com.example.teabot.handlers;
+package com.example.teabot.handlers.state;
 
+import com.example.teabot.handlers.OrderStateHandler;
 import com.example.teabot.model.enums.NavigationButtons;
 import com.example.teabot.model.enums.OrderState;
 import com.example.teabot.model.enums.tea.Additive;
@@ -10,11 +11,11 @@ import java.util.Set;
 import static com.example.teabot.model.enums.OrderState.CUP_BUILDING_TYPE_PROPOSAL;
 import static com.example.teabot.model.enums.OrderState.ERROR;
 
-public class NavigationHandler {
+class NavigationHandler implements OrderStateHandler<NavigationButtons> {
 
-    public OrderInfo updateOrder(OrderInfo order, String attributeAsString) {
-        final NavigationButtons instance = NavigationButtons.getInstance(attributeAsString);
-        final OrderState state = calculateNewState(order, instance);
+    @Override
+    public OrderInfo updateOrderState(OrderInfo order, NavigationButtons param) {
+        final OrderState state = calculateNewState(order, param);
 
         order.setCurrentState(state);
 
@@ -25,7 +26,7 @@ public class NavigationHandler {
         return switch (instance) {
             case NEXT -> {
                 final OrderState currentState = order.getCurrentState();
-//
+
                 final Set<Additive> additives = order.getTea().getAdditives();
                 if (currentState == OrderState.ADDITIONS_AWAITING && !additives.isEmpty()) {
                     order.setNextState(CUP_BUILDING_TYPE_PROPOSAL);

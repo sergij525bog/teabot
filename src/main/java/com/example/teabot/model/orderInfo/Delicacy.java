@@ -20,6 +20,16 @@ public final class Delicacy {
     public static final byte MIN = 1;
     public static final byte MAX = 5;
 
+    public void setCount(DelicacyCount count) {
+        final int value = count.getValue();
+
+        if (value < MIN || value > MAX) {
+            throw new IllegalArgumentException("Delicacy count must be between " + MIN + " and " + MAX);
+        }
+
+        this.count = count;
+    }
+
     @Override
     public String toString() {
         String delicacyCount = count != null ? count.getValue() + "" : null;

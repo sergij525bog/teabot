@@ -10,7 +10,9 @@ class TeaTypeHandler implements OrderAttributeHandler<Type> {
     @Override
     public OrderInfo updateOrder(OrderInfo order, Type attribute) {
         final Tea tea = order.getTea();
+
         tea.setType(attribute);
+        tea.setName(null);
 
         return order;
     }

@@ -2,12 +2,12 @@ package com.example.teabot.bot;
 
 import com.example.teabot.handlers.StateView;
 import com.example.teabot.handlers.UserInputHandler;
-import com.example.teabot.views.StateViewFactory;
 import com.example.teabot.model.ChatHandler;
 import com.example.teabot.model.UpdateParser;
 import com.example.teabot.model.enums.OrderState;
 import com.example.teabot.model.orderInfo.OrderInfo;
 import com.example.teabot.utils.StringUtil;
+import com.example.teabot.views.StateViewFactory;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -61,7 +61,6 @@ class ChatMessageRenderer {
 
     private static void renderMessage(Long senderId, TeaBot bot) {
         final var view = getView(senderId, getCurrentState(senderId));
-//        final var view = getHandlerForState(senderId, getCurrentState(senderId));
 
         ChatHandler.renderMessage(
                 senderId,

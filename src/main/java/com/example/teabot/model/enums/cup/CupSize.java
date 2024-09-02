@@ -9,22 +9,17 @@ import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Getter
-public enum Name implements OrderAttribute {
-    OPTIMIST("optimist"),
-    BIG_BLUE("big blue"),
-    BIG_GRAY("big gray"),
-    TERMO("termo"),
-    TURQUOISE("biryuza"),
-    BLACK("black"),
-    GLASS_SMALL("small glass"),
-    GLASS_BIG("big glass"),
+public enum CupSize implements OrderAttribute {
+    SMALL("small"),
+    MEDIUM("medium"),
+    BIG("big"),
     NO_MATTER("no matter");
 
-    private final String name;
+    private final String size;
 
     @Override
     public Stream<String> attributesAsStream() {
         return Arrays.stream(values())
-                .map(Name::getName);
+                .map(CupSize::getSize);
     }
 }
