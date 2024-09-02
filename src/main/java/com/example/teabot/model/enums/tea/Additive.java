@@ -19,13 +19,12 @@ public enum Additive implements OrderAttribute {
     private final String additive;
 
     @Override
-    public Stream<String> attributesAsStream() {
-        return Arrays.stream(values())
-                .map(Additive::getAdditive);
+    public String toString() {
+        return additive;
     }
 
     @Override
-    public String toString() {
+    public String asString() {
         return additive;
     }
 }

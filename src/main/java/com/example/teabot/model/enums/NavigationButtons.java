@@ -35,8 +35,7 @@ public enum NavigationButtons implements OrderAttribute {
     }
 
     @Override
-    public Stream<String> attributesAsStream() {
-        return Stream.of(values())
-                .map(NavigationButtons::getNavigation);
+    public String asString() {
+        return navigation;
     }
 }

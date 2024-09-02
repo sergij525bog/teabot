@@ -18,8 +18,7 @@ public enum CupSize implements OrderAttribute {
     private final String size;
 
     @Override
-    public Stream<String> attributesAsStream() {
-        return Arrays.stream(values())
-                .map(CupSize::getSize);
+    public String asString() {
+        return size;
     }
 }

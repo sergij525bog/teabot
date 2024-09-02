@@ -20,8 +20,8 @@ public class UpdateParser {
 
 
     public static UpdateParser fromUpdate(Update update) {
-        final UpdateParser parser = new UpdateParser();
         if (update.hasMessage()) {
+            final UpdateParser parser = new UpdateParser();
             final Message message = update.getMessage();
 
             parser.chatId = message.getChatId();

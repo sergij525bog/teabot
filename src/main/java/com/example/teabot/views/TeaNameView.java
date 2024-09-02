@@ -13,6 +13,6 @@ class TeaNameView implements StateView {
 
     @Override
     public ReplyKeyboard getMarkup() {
-        return KeyboardFactory.getKeyboardByParameter(TeaName.LOVARE, question());
+        return KeyboardFactory.getKeyboardByParameter(TeaName.values(), question());
     }
 }

@@ -7,14 +7,15 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.util.EnumMap;
+import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class StateViewFactory {
 
-    private static final EnumMap<OrderState, StateView> views = initializeMap();
+    private static final Map<OrderState, StateView> views = initializeMap();
 
-    private static EnumMap<OrderState, StateView> initializeMap() {
-        final EnumMap<OrderState, StateView> map = new EnumMap<>(OrderState.class);
+    private static Map<OrderState, StateView> initializeMap() {
+        final Map<OrderState, StateView> map = new EnumMap<>(OrderState.class);
 
         map.put(OrderState.START, new StartView());
 

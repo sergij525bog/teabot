@@ -16,13 +16,12 @@ public enum TeaBuildingType implements OrderAttribute {
     private final String value;
 
     @Override
-    public Stream<String> attributesAsStream() {
-        return Arrays.stream(values())
-                .map(TeaBuildingType::getValue);
+    public String toString() {
+        return value;
     }
 
     @Override
-    public String toString() {
+    public String asString() {
         return value;
     }
 }

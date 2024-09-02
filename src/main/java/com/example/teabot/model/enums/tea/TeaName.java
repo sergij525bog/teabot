@@ -17,15 +17,20 @@ public enum TeaName implements OrderAttribute {
     PICVIC("picvic");
 
     private final String value;
-
-    @Override
-    public Stream<String> attributesAsStream() {
-        return Arrays.stream(values())
-                .map(TeaName::getValue);
-    }
+//
+//    @Override
+//    public Stream<String> attributesAsStream() {
+//        return Arrays.stream(values())
+//                .map(TeaName::getValue);
+//    }
 
     @Override
     public String toString() {
+        return value;
+    }
+
+    @Override
+    public String asString() {
         return value;
     }
 }

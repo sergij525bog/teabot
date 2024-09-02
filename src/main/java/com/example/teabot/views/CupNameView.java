@@ -13,6 +13,6 @@ class CupNameView implements StateView {
 
     @Override
     public ReplyKeyboard getMarkup() {
-        return KeyboardFactory.getKeyboardByParameter(CupName.BIG_BLUE, question());
+        return KeyboardFactory.getKeyboardByParameter(CupName.values(), question());
     }
 }

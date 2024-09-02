@@ -14,8 +14,7 @@ public enum StartCommand implements OrderAttribute {
     private final String value;
 
     @Override
-    public Stream<String> attributesAsStream() {
-        return Stream.of(values())
-                .map(StartCommand::getValue);
+    public String asString() {
+        return value;
     }
 }

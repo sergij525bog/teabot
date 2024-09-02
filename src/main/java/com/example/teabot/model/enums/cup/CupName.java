@@ -23,8 +23,7 @@ public enum CupName implements OrderAttribute {
     private final String name;
 
     @Override
-    public Stream<String> attributesAsStream() {
-        return Arrays.stream(values())
-                .map(CupName::getName);
+    public String asString() {
+        return name;
     }
 }

@@ -13,6 +13,6 @@ class AdditiveStateView implements StateView {
 
     @Override
     public ReplyKeyboard getMarkup() {
-        return KeyboardFactory.getKeyboardByParameter(Additive.NONE, question());
+        return KeyboardFactory.getKeyboardByParameter(Additive.values(), question());
     }
 }

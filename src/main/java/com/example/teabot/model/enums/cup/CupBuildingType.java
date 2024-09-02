@@ -16,8 +16,7 @@ public enum CupBuildingType implements OrderAttribute {
     private final String type;
 
     @Override
-    public Stream<String> attributesAsStream() {
-        return Arrays.stream(values())
-                .map(CupBuildingType::getType);
+    public String asString() {
+        return type;
     }
 }

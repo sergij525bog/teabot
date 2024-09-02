@@ -8,62 +8,66 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 class KeyboardFactory {
-    private static final Map<Class<? extends OrderAttribute>, ReplyKeyboard> keyboardMap = new HashMap<>();
-    private static final KeyboardRow navigationRow = createNavigationRow();
-    public static final int GROUP_SIZE = 4;
+    private static final Map<Class<? extends OrderAttribute>, ReplyKeyboard>
+            KEYBOARDS = new HashMap<>();
+    private static final KeyboardRow NAVIGATION_ROW = createNavigationRow();
+    private static final int GROUP_SIZE = 4;
 
-    public static <T extends OrderAttribute> ReplyKeyboard getKeyboardByParameter(T parameter, String placeholder) {
-        final Class<? extends OrderAttribute> parameterClass = parameter.getClass();
-        ReplyKeyboard keyboard = keyboardMap.get(parameterClass);
+    public static <T extends OrderAttribute>
+    ReplyKeyboard getKeyboardByParameter(T[] parameters, String placeholder) {
+        final Class<? extends OrderAttribute> parameterClass = parameters[0].getClass();
+        ReplyKeyboard keyboard = KEYBOARDS.get(parameterClass);
 
         if (keyboard == null) {
             keyboard = ReplyKeyboardMarkup.builder()
-                    .keyboard(parametersRows(parameter))
-                    .keyboardRow(navigationRow)
+                    .keyboard(parametersRows(parameters))
+                    .keyboardRow(NAVIGATION_ROW)
                     .inputFieldPlaceholder(placeholder)
                     .selective(true)
                     .resizeKeyboard(true)
                     .build();
 
-            keyboardMap.put(parameterClass, keyboard);
+            KEYBOARDS.put(parameterClass, keyboard);
         }
 
         return keyboard;
     }
 
-    private static <T extends OrderAttribute> List<KeyboardRow> parametersRows(T parameter) {
+    private static <T extends OrderAttribute>
+    List<KeyboardRow> parametersRows(T[] parameters) {
         final AtomicInteger counter = new AtomicInteger();
 
-        return parameter
-                .attributesAsStream()
+        return toStream(parameters)
                 .collect(Collectors.groupingBy(i -> counter.getAndIncrement() / GROUP_SIZE))
                 .values()
                 .stream()
-                .map(chunk -> {
-                    final KeyboardRow row = new KeyboardRow();
-                    row.addAll(chunk);
-
-                    return row;
-                })
+                .map(KeyboardFactory::createKeyboardRow)
                 .toList();
     }
 
     private static KeyboardRow createNavigationRow() {
-        final KeyboardRow navigationRow = new KeyboardRow();
+        final List<String> buttons = toStream(NavigationButtons.values())
+                .toList();
+        return createKeyboardRow(buttons);
+    }
 
-        Arrays.stream(NavigationButtons.values())
-                .map(NavigationButtons::getNavigation)
-                .forEach(navigationRow::add);
+    private static KeyboardRow createKeyboardRow(List<String> buttons) {
+        final KeyboardRow row = new KeyboardRow();
+        row.addAll(buttons);
 
-        return navigationRow;
+        return row;
+    }
+
+    private static <T extends OrderAttribute>
+    Stream<String> toStream(T[] elements) {
+        return Arrays.stream(elements)
+                .map(OrderAttribute::asString);
     }
 }

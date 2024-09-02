@@ -18,11 +18,16 @@ public enum DelicacyCount implements OrderAttribute {
 
     private final int value;
 
+//    @Override
+//    public Stream<String> attributesAsStream() {
+//        return Stream.of(values())
+//                .filter(v -> v != ZERO)
+//                .map(DelicacyCount::getValue)
+//                .map(String::valueOf);
+//    }
+
     @Override
-    public Stream<String> attributesAsStream() {
-        return Stream.of(values())
-                .filter(v -> v != ZERO)
-                .map(DelicacyCount::getValue)
-                .map(String::valueOf);
+    public String asString() {
+        return String.valueOf(value);
     }
 }

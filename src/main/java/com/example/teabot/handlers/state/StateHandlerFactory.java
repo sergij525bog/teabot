@@ -8,15 +8,18 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.util.EnumMap;
+import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class StateHandlerFactory {
 
-    private static final EnumMap<OrderState, OrderStateHandler<? extends OrderAttribute>> handlers = initializeMap();
-    private static final OrderStateHandler<NavigationButtons> NAVIGATION_HANDLER = new NavigationHandler();
+    private static final Map<OrderState, OrderStateHandler<? extends OrderAttribute>>
+            HANDLERS = initializeMap();
+    private static final OrderStateHandler<NavigationButtons>
+            NAVIGATION_HANDLER = new NavigationHandler();
 
-    private static EnumMap<OrderState, OrderStateHandler<? extends OrderAttribute>> initializeMap() {
-        final EnumMap<OrderState, OrderStateHandler<? extends OrderAttribute>> map = new EnumMap<>(OrderState.class);
+    private static Map<OrderState, OrderStateHandler<? extends OrderAttribute>> initializeMap() {
+        final Map<OrderState, OrderStateHandler<? extends OrderAttribute>> map = new EnumMap<>(OrderState.class);
 
         map.put(OrderState.START, new StartStateHandler());
 
@@ -40,11 +43,11 @@ public class StateHandlerFactory {
 
     @SuppressWarnings("unchecked cast")
     public static <T extends OrderAttribute> OrderStateHandler<T> getHandlerByState(OrderState state) {
-        if (!handlers.containsKey(state)) {
+        if (!HANDLERS.containsKey(state)) {
             throw new NullPointerException("There is no handler for state " + state);
         }
 
-        return (OrderStateHandler<T>) handlers.get(state);
+        return (OrderStateHandler<T>) HANDLERS.get(state);
     }
 
     public static OrderStateHandler<NavigationButtons> getNavigationHandler() {

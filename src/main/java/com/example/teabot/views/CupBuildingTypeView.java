@@ -13,6 +13,6 @@ class CupBuildingTypeView implements StateView {
 
     @Override
     public ReplyKeyboard getMarkup() {
-        return KeyboardFactory.getKeyboardByParameter(CupBuildingType.BY_NAME, question());
+        return KeyboardFactory.getKeyboardByParameter(CupBuildingType.values(), question());
     }
 }

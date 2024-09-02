@@ -8,7 +8,7 @@ class TeaBuildingProposalView implements StateView {
 
     @Override
     public ReplyKeyboard getMarkup() {
-        return KeyboardFactory.getKeyboardByParameter(TeaBuildingType.BY_NAME, question());
+        return KeyboardFactory.getKeyboardByParameter(TeaBuildingType.values(), question());
     }
 
     @Override

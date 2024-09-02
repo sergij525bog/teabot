@@ -28,16 +28,31 @@ public class UserInputHandler {
                 .orElseGet(() -> updateOrderWithError(order));
     }
 
-    private static <T extends OrderAttribute> OrderInfo doUpdate(
+    private static <T extends OrderAttribute>
+    OrderInfo doUpdate(
             OrderInfo order,
             final OrderState state,
             final T attribute
     ) {
-        final var attributeHandler = AttributeHandlerFactory.getHandlerByState(state);
-        final var stateHandler = StateHandlerFactory.getHandlerByState(state);
+        if (!state.isNeutralForOrder()) {
+            order = updateOrderAttribute(order, state, attribute);
+        }
 
-        order = attributeHandler.updateOrder(order, attribute);
-        return stateHandler.updateOrderState(order, attribute);
+        return updateOrderState(order, state, attribute);
+    }
+
+    private static <T extends OrderAttribute> OrderInfo
+    updateOrderAttribute(OrderInfo order, OrderState state, T attribute) {
+        return AttributeHandlerFactory
+                .getHandlerByState(state)
+                .updateOrder(order, attribute);
+    }
+
+    private static <T extends OrderAttribute> OrderInfo
+    updateOrderState(OrderInfo order, OrderState state, T attribute) {
+        return StateHandlerFactory
+                .getHandlerByState(state)
+                .updateOrderState(order, attribute);
     }
 
     private static OrderInfo updateOrderWithError(OrderInfo order) {

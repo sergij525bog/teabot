@@ -17,8 +17,7 @@ public enum MakerSelectingProposals implements OrderAttribute {
     private final String message;
 
     @Override
-    public Stream<String> attributesAsStream() {
-        return Arrays.stream(values())
-                .map(MakerSelectingProposals::getMessage);
+    public String asString() {
+        return message;
     }
 }

@@ -17,13 +17,12 @@ public enum Type implements OrderAttribute {
     private final String type;
 
     @Override
-    public Stream<String> attributesAsStream() {
-        return Arrays.stream(values())
-                .map(Type::getType);
+    public String toString() {
+        return type;
     }
 
     @Override
-    public String toString() {
+    public String asString() {
         return type;
     }
 }

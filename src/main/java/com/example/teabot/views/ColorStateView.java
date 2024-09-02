@@ -8,7 +8,7 @@ class ColorStateView implements StateView {
 
     @Override
     public ReplyKeyboard getMarkup() {
-        return KeyboardFactory.getKeyboardByParameter(Color.BLACK, question());
+        return KeyboardFactory.getKeyboardByParameter(Color.values(), question());
     }
 
     @Override

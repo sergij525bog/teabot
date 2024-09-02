@@ -13,6 +13,6 @@ class CupSizeView implements StateView {
 
     @Override
     public ReplyKeyboard getMarkup() {
-        return KeyboardFactory.getKeyboardByParameter(CupSize.BIG, question());
+        return KeyboardFactory.getKeyboardByParameter(CupSize.values(), question());
     }
 }

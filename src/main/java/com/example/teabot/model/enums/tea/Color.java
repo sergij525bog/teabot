@@ -17,13 +17,12 @@ public enum Color implements OrderAttribute {
     private final String color;
 
     @Override
-    public Stream<String> attributesAsStream() {
-        return Arrays.stream(values())
-                .map(Color::getColor);
+    public String toString() {
+        return color;
     }
 
     @Override
-    public String toString() {
+    public String asString() {
         return color;
     }
 }

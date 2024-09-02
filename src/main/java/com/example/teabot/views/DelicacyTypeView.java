@@ -13,6 +13,6 @@ class DelicacyTypeView implements StateView {
 
     @Override
     public ReplyKeyboard getMarkup() {
-        return KeyboardFactory.getKeyboardByParameter(DelicacyType.CAKE, question());
+        return KeyboardFactory.getKeyboardByParameter(DelicacyType.values(), question());
     }
 }

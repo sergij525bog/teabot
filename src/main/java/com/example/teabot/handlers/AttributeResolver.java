@@ -24,15 +24,15 @@ import static com.example.teabot.model.enums.OrderState.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AttributeResolver {
-    private static final Map<OrderState, Map<String, ? extends OrderAttribute>> map = createMap();
+    private static final Map<OrderState, Map<String, ? extends OrderAttribute>> ATTRIBUTES = createMap();
 
     public static Optional<? extends OrderAttribute> resolve(OrderState state, String attribute) {
-        return Optional.ofNullable(map.get(state))
+        return Optional.ofNullable(ATTRIBUTES.get(state))
                 .map(m -> m.get(attribute));
     }
 
     private static Map<OrderState, Map<String, ? extends OrderAttribute>> createMap() {
-        EnumMap<OrderState, Map<String, ? extends OrderAttribute>> map = new EnumMap<>(OrderState.class);
+        final Map<OrderState, Map<String, ? extends OrderAttribute>> map = new EnumMap<>(OrderState.class);
 
         map.put(START, mapFromEnum(StartCommand.values(), StartCommand::getValue));
         map.put(TEA_MAKER_BUILDING_PROPOSAL, mapFromEnum(

@@ -22,8 +22,7 @@ public enum DelicacyType implements OrderAttribute {
     private final String type;
 
     @Override
-    public Stream<String> attributesAsStream() {
-        return Arrays.stream(values())
-                .map(DelicacyType::getType);
+    public String asString() {
+        return type;
     }
 }

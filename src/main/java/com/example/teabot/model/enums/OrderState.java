@@ -1,30 +1,35 @@
 package com.example.teabot.model.enums;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+@Getter
 public enum OrderState {
-    START,
+    START(true),
 
-    TEA_MAKER_BUILDING_PROPOSAL,
-    TEA_BUILDING_TYPE_PROPOSAL,
-    TEA_BUILDING_TYPE_AWAITING,
-    INPUT_NAME_AWAITING,
-    TYPE_SELECTION_AWAITING,
-    COLOR_SELECTION_AWAITING,
-    ADDITIONS_AWAITING,
+    TEA_MAKER_BUILDING_PROPOSAL(false),
+    TEA_BUILDING_TYPE_PROPOSAL(true),
+    INPUT_NAME_AWAITING(false),
+    TYPE_SELECTION_AWAITING(false),
+    COLOR_SELECTION_AWAITING(false),
+    ADDITIONS_AWAITING(false),
 
-    CUP_BUILDING_TYPE_PROPOSAL,
-    CUP_BUILDING_TYPE_AWAITING,
-    CUP_SIZE_AWAITING,
-    CUP_NAME_AWAITING,
+    CUP_BUILDING_TYPE_PROPOSAL(true),
+    CUP_SIZE_AWAITING(false),
+    CUP_NAME_AWAITING(false),
 
-    DELICACY_TYPE_AWAITING,
-    DELICACY_COUNT_AWAITING,
+    DELICACY_TYPE_AWAITING(false),
+    DELICACY_COUNT_AWAITING(false),
 
-    SAVE_ORDER_AWAITING,
-    CANCEL_ORDER,
-    WITHOUT_ORDER,
+    SAVE_ORDER_AWAITING(true),
+    CANCEL_ORDER(true),
+    WITHOUT_ORDER(true),
 
-    ERROR,
-    NULL;
+    ERROR(true),
+    NULL(true);
+
+    private final boolean isNeutralForOrder;
 
     public static boolean isFinal(OrderState state) {
         return state == SAVE_ORDER_AWAITING ||

@@ -1,6 +1,7 @@
-package com.example.teabot.model;
+package com.example.teabot.bot;
 
-import com.example.teabot.bot.TeaBot;
+import com.example.teabot.handlers.StateView;
+import com.example.teabot.model.UpdateParser;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
@@ -16,13 +17,9 @@ public class ChatHandler {
     private static final Map<Long, Long> memberChat = new HashMap<>();
     private static final Set<Long> chatToDelete = new HashSet<>();
 
-    public static void markChatToDelete(Long senderId) {
-        chatToDelete.add(senderId);
-    }
-
     @SneakyThrows
-    public static void renderMessage(Long senderId, String text, ReplyKeyboard markup, TeaBot bot) {
-        final SendMessage message = buildMessage(senderId, text, markup);
+    public static void renderMessage(Long senderId, StateView view, TeaBot bot) {
+        final SendMessage message = buildMessage(senderId, view.question(), view.getMarkup());
 
         final Integer messageId = bot.execute(message).getMessageId();
         storeMessage(senderId, messageId);
@@ -58,6 +55,10 @@ public class ChatHandler {
         messageIds.clear();
 
         bot.execute(messages);
+    }
+
+    public static void markChatToDelete(Long senderId) {
+        chatToDelete.add(senderId);
     }
 
     public static boolean chatShouldBeDeleted(Long senderId) {

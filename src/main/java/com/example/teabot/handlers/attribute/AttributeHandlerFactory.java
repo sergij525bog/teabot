@@ -7,19 +7,17 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.util.EnumMap;
+import java.util.Map;
 
 @SuppressWarnings("unchecked cast")
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AttributeHandlerFactory {
-    private static final EnumMap<OrderState, OrderAttributeHandler<? extends OrderAttribute>> handlers = initializeHandlers();
+    private static final Map<OrderState, OrderAttributeHandler<? extends OrderAttribute>>
+            HANDLERS = initializeHandlers();
 
-    private static EnumMap<OrderState, OrderAttributeHandler<? extends OrderAttribute>> initializeHandlers() {
-        final EnumMap<OrderState, OrderAttributeHandler<? extends OrderAttribute>> handlers =
+    private static Map<OrderState, OrderAttributeHandler<? extends OrderAttribute>> initializeHandlers() {
+        final Map<OrderState, OrderAttributeHandler<? extends OrderAttribute>> handlers =
                 new EnumMap<>(OrderState.class);
-        final NullHandler nullHandler = new NullHandler();
-        handlers.put(OrderState.START, nullHandler);
-        handlers.put(OrderState.TEA_BUILDING_TYPE_PROPOSAL, nullHandler);
-        handlers.put(OrderState.CUP_BUILDING_TYPE_PROPOSAL, nullHandler);
 
         handlers.put(OrderState.TEA_MAKER_BUILDING_PROPOSAL, new TeaMakerProposalHandler());
 
@@ -38,10 +36,10 @@ public class AttributeHandlerFactory {
     }
 
     public static <T extends OrderAttribute> OrderAttributeHandler<T> getHandlerByState(OrderState state) {
-        if (!handlers.containsKey(state)) {
+        if (!HANDLERS.containsKey(state)) {
             throw new NullPointerException("There is no handler for state " + state);
         }
 
-        return (OrderAttributeHandler<T>) handlers.get(state);
+        return (OrderAttributeHandler<T>) HANDLERS.get(state);
     }
 }

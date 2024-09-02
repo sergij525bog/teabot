@@ -2,7 +2,6 @@ package com.example.teabot.bot;
 
 import com.example.teabot.handlers.StateView;
 import com.example.teabot.handlers.UserInputHandler;
-import com.example.teabot.model.ChatHandler;
 import com.example.teabot.model.UpdateParser;
 import com.example.teabot.model.enums.OrderState;
 import com.example.teabot.model.orderInfo.OrderInfo;
@@ -62,12 +61,7 @@ class ChatMessageRenderer {
     private static void renderMessage(Long senderId, TeaBot bot) {
         final var view = getView(senderId, getCurrentState(senderId));
 
-        ChatHandler.renderMessage(
-                senderId,
-                view.question(),
-                view.getMarkup(),
-                bot
-        );
+        ChatHandler.renderMessage(senderId, view, bot);
     }
 
     private static void clearOrderAndChatInfoIfNeeded(Long senderId) {

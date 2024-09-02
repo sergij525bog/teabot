@@ -13,6 +13,6 @@ class TeaMakerProposalView implements StateView {
 
     @Override
     public ReplyKeyboard getMarkup() {
-        return KeyboardFactory.getKeyboardByParameter(MakerSelectingProposals.I_WANT_TEA, question());
+        return KeyboardFactory.getKeyboardByParameter(MakerSelectingProposals.values(), question());
     }
 }
